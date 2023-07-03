@@ -33,6 +33,8 @@ $routes->get('/', 'UserController::login');
 
 $routes->match(['get', 'post'], 'login', 'UserController::login', ["filter" => "noauth"]);
 $routes->match(['get', 'post'], 'signup', 'UserController::signup', ["filter" => "noauth"]);
+$routes->match(['get', 'post'], 'forget', 'UserController::forget', ["filter" => "noauth"]);
+
 $routes->match(['get', 'post'], 'updateprofile', 'UserController::updateprofile', ["filter" => "auth"]);
 
 $routes->match(['get', 'post'], 'tenant_data', 'TenantController::createtenant', ["filter" => "auth"]);
@@ -63,8 +65,36 @@ $routes->get('/ajax-request', 'AdminController::ajaxrequest');
 $routes->match(['get', 'post'], 'changerole', 'AdminController::updateRole', ["filter" => "auth"]);
 
 
+$routes->get('validatepage/(:num)', 'UserController::validatepage/$1');
+$routes->get('validateoption/(:num)', 'UserController::validateoption/$1');
+
+$routes->get('createquestion', 'QandAController::index', ["filter" => "auth"]);
+$routes->get('questionList', 'QandAController::questionList', ["filter" => "auth"]);
+$routes->get('editquestion/(:num)', 'QandAController::editquestion/$1', ["filter" => "auth"]);
+$routes->get('deletequestion/(:num)', 'QandAController::deletequestion/$1', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'editquestion/(:num)', 'QandAController::editquestion/$1', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'deletequestion/(:num)', 'QandAController::deletequestion/$1', ["filter" => "auth"]);
+
+$routes->get('createSurvey', 'SurveyController::index', ["filter" => "auth"]);
+$routes->get('surveyList', 'SurveyController::surveyList', ["filter" => "auth"]);
+$routes->get('editsurvey/(:num)', 'SurveyController::editsurvey/$1', ["filter" => "auth"]);
+$routes->get('deletesurvey/(:num)', 'SurveyController::deletesurvey/$1', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'editsurvey/(:num)', 'SurveyController::editsurvey/$1', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'deletesurvey/(:num)', 'SurveyController::deletesurvey/$1', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'create_survey', 'SurveyController::createSurvey', ["filter" => "auth"]);
+
+
+$routes->match(['get', 'post'], 'create_question', 'QandAController::createQuestion', ["filter" => "auth"]);
+
+$routes->get('emailtemplate', 'EmailTemplateController::index', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'uploadFile', 'EmailTemplateController::uploadFile', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'sendEmail', 'EmailTemplateController::sendEmail', ["filter" => "auth"]);
+
 
 $routes->get('logout', 'UserController::logout');
+
+$routes->get('forget', 'UserController::forget');
+
 
 /*
  * --------------------------------------------------------------------

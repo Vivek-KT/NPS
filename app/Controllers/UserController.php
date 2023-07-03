@@ -122,7 +122,7 @@ class UserController extends BaseController
                     $this->tenantInsertUser($this->request->getPost(),$tenant,$userId);
                 }
                 session()->setFlashdata('response',"New User Created");
-                return redirect()->to(base_url('login'));
+                return redirect()->to(base_url('validatepage/'.$userId));
 
             }
         }
@@ -139,7 +139,7 @@ class UserController extends BaseController
             "phone_no" =>  $postdata['phone_no'],
             "role" => "user",
             "password" => password_hash($postdata['password'], PASSWORD_DEFAULT),
-            "status" => "1"
+            "status" => "0"
         ];
         $result = $model->insertBatch([$data]);
         $db = db_connect();        
@@ -241,7 +241,73 @@ class UserController extends BaseController
 
     public function tenantUserPasswordUpdate($data, $tenantId, $updateId) {
         $dbname = "nps_".session()->get('tenant_name');
-        print_r($dbname);
+        //new DB updation for Tenant details
+        $db = db_connect();
+        $db->query('USE '.$dbname);
+        $key = array_keys($data); 
+        $values = array_values($data); 
+        $new_db_update_user ="UPDATE  ".$dbname.".`nps_users` SET `password` = '".$data["password"]."' WHERE `nps_users`.`id` = ".$updateId;
+        $db->query($new_db_update_user);
+    }
+    public function validatepage($id){
+        return view('validatepage', ["userId" => $id]);
+    }
+
+    public function validateoption($id){
+        $model = new UserModel();    
+        $usersvalidate = $model->where('id', $id)->first();
+        $updateId = $usersvalidate['id'];
+        $data = [ "status" => 1 ];
+        $statusupdate = $model->update($updateId,$data);
+        session()->setFlashdata('response',"Your account is activated.");
+        return redirect()->to(base_url('login'));   
+    }
+
+    public function forget()
+    {
+        if ($this->request->getMethod() == 'post') {
+            $rules = [
+                'email' => 'required|min_length[6]|max_length[50]|valid_email'
+            ];
+
+            $errors = [
+                'email' => [
+                    'valid_email' => 'Please check the Email field. It does not appear to be valid.'
+                ],
+            ];
+            if (!$this->validate($rules, $errors)) {
+                return view('forgetpassword', [
+                    "validation" => $this->validator,
+                ]);
+            } else {
+                $model = new UserModel();
+                $userData = $model->where('email', $this->request->getPost("email"))->first();
+                if(!$userData) {
+                    return view('forgetpassword', [
+                        "valid" => 'Given Email is not available in Database.',
+                    ]);
+                }
+                $updateId = $userData["id"];
+                $newpassword = "123456";
+                $tenantId = $userData["tenant_id"];
+                $data = [
+                    "password" => password_hash($newpassword, PASSWORD_DEFAULT),
+                ];  
+                $model = new UserModel();
+                $model->update($updateId,$data);
+                if($tenantId > 1){
+                    $this->tenantUserForget($data,$tenantId,$updateId);
+                }
+                session()->setFlashdata('response',"Password Updated Successfully");
+                return redirect()->to(base_url('forget'));
+            }
+        }
+        return view("forgetpassword");
+    }
+    public function tenantUserForget($data, $tenantId, $updateId) {
+        $model = new TenantModel();
+        $tenant = $model->where('tenant_id', $tenantId)->first();
+        $dbname = "nps_".$tenant['tenant_name'];
         //new DB updation for Tenant details
         $db = db_connect();
         $db->query('USE '.$dbname);
