@@ -4,16 +4,16 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class TenantModel extends Model
+class QuestionModel extends Model
 {
     protected $DBGroup          = 'default';
-    protected $table            = 'nps_tenant';
-    protected $primaryKey       = 'tenant_id';
+    protected $table            = 'nps_question_details';
+    protected $primaryKey       = 'question_id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['tenant_name', 'database_name', 'host', 'username', 'password'];
+    protected $allowedFields    = ["question_name", "description", "info_details", "user_id"];
 
     // Dates
     protected $useTimestamps = false;

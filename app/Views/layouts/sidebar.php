@@ -30,6 +30,21 @@
             <i class="fas fa-fw fa-user"></i>
             <span>User Permission</span></a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="<?php echo site_url('questionList'); ?>">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Question List</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="<?php echo site_url('surveyList'); ?>">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Survery List</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="<?php echo site_url('emailtemplate'); ?>">
+            <i class="fas fa-fw fa-user"></i>
+            <span>Email Template</span></a>
+        </li>
         <?php  } ?>
         <li class="nav-item">
           <a class="nav-link" href="<?php echo site_url('changepassword'); ?>">

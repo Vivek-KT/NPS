@@ -4,16 +4,16 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class TenantModel extends Model
+class SurveyModel extends Model
 {
     protected $DBGroup          = 'default';
-    protected $table            = 'nps_tenant';
-    protected $primaryKey       = 'tenant_id';
+    protected $table            = 'nps_survey_details';
+    protected $primaryKey       = 'campign_id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['tenant_name', 'database_name', 'host', 'username', 'password'];
+    protected $allowedFields    = ["user_id", "campain_name", "question_id_1", "question_id_2"];
 
     // Dates
     protected $useTimestamps = false;

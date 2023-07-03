@@ -4,16 +4,16 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class TenantModel extends Model
+class ExternalcontactsModel extends Model
 {
     protected $DBGroup          = 'default';
-    protected $table            = 'nps_tenant';
-    protected $primaryKey       = 'tenant_id';
+    protected $table            = 'nps_external_contacts';
+    protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['tenant_name', 'database_name', 'host', 'username', 'password'];
+    protected $allowedFields    = ["created_by","name", "firstname", "lastname", "contact_details", "email_id"];
 
     // Dates
     protected $useTimestamps = false;

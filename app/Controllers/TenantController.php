@@ -188,7 +188,8 @@ class TenantController extends BaseController
             `campign_id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `user_id` int(11) NOT NULL,
             `campain_name` varchar(120) NOT NULL,
-            `mail_sent_to` text NOT NULL,
+            `question_id_1` int(11) NOT NULL,
+            `question_id_2` int(11) NOT NULL,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
         $db->query($nps_survey_details);

@@ -10,9 +10,8 @@
     <!-- Page Content -->
     <h1>User permission List</h1>
     <hr>
+    <?php echo script_tag('js/jquery.min.js'); ?>
 
-<script
-src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
 <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
@@ -73,30 +72,4 @@ src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 </div>
 </div>
 
-<script type="text/javascript">
-  
-  // function demochange(sender, value){
-  //   $(".role_"+value).prop("checked", sender.checked);
-
-  //   var demolink = $(".role_"+value).attr('data-on');
-  //   console.log($(".role_"+value).attr('checked'));
-  //   var is_checked = $(".role_"+value).is(':checked');
-
-  //   if($("#toggle_show_cancelled").attr("checked") == true){
-  //     alert('vv');
-  //   }else{
-  //     alert('ss');
-  //   }
-  //   alert(demolink);
-  // };
-//   $.ajax({  
-//     url:<?php echo base_url('changerole'); ?>,
-//     type: 'post',
-//     dataType:'json',
-//     data:{query:query},
-//     success:function(data){
-//         alert(data);
-//     }  
-// });
-  </script>
 <?= $this->endSection() ?>
