@@ -90,10 +90,16 @@ $routes->get('emailtemplate', 'EmailTemplateController::index', ["filter" => "au
 $routes->match(['get', 'post'], 'uploadFile', 'EmailTemplateController::uploadFile', ["filter" => "auth"]);
 $routes->match(['get', 'post'], 'sendEmail', 'EmailTemplateController::sendEmail', ["filter" => "auth"]);
 
-
 $routes->get('logout', 'UserController::logout');
 
 $routes->get('forget', 'UserController::forget');
+$routes->match(['get', 'post'], 'getSurveyAnwser/(:any)/(:any)/(:any)/(:any)', 'EmailTemplateController::getSurveyAnwser/$1/$2/$3/$4');
+
+$routes->get('getSurveyAnwser/(:any)/(:any)/(:any)/(:any)', 'EmailTemplateController::getSurveyAnwser/$1/$2/$3/$4');
+$routes->match(['get', 'post'], 'createsurveyanswer', 'EmailTemplateController::createsurveyanswer');
+
+$routes->get('SurveyResponse', 'SurveyResponseController::index', ["filter" => "auth"]);
+
 
 
 /*

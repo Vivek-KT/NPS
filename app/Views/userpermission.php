@@ -1,10 +1,10 @@
 <?= $this->extend("layouts/app") ?>
 
 <?= $this->section("body") ?>
-<div id="wrapper">
 <?php include APPPATH.'views/layouts/sidebar.php';?>
-<div id="content-wrapper">
-    <div class="container-fluid">
+<section class="home">
+        <div class="container">
+
         <!-- Breadcrumbs-->
     <?php include APPPATH.'views/layouts/breadcrumb.php';?>  
     <!-- Page Content -->
@@ -16,8 +16,8 @@
 <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
 
-    <table class="table table-striped">
-  <thead>
+    <table class="table table-striped table-bordered">
+  <thead >
     <tr>
       <th scope="col">#</th>
       <th scope="col">Name</th>
@@ -25,8 +25,9 @@
       <th scope="col">Action</th>
     </tr>
   </thead>
-  <?php foreach($users as $userdata) { ?>
   <tbody>
+  <?php foreach($users as $userdata) { ?>
+  
     <tr>
       <th scope="row"><?php echo $userdata['id']; ?></th>
       <td><?php echo $userdata['firstname']." ".$userdata['lastname']; ?></td>
@@ -37,8 +38,7 @@
     </label>
 
 </td>
-    </tr>
-  </tbody>
+    
   <script type="text/javascript">
     $("#toggle_show_cancelled<?php echo $userdata['id']; ?>").change(function(){
     if($(this).prop("checked") == true){
@@ -65,11 +65,12 @@
 });
 
 </script>
+</tr>
   <?php } ?>
-    
+  </tbody>
+
 </table>
 </div>
-</div>
-</div>
+</section>
 
 <?= $this->endSection() ?>

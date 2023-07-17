@@ -1,4 +1,4 @@
-<?= $this->extend("layouts/app") ?>
+<?= $this->extend("layouts/app_before") ?>
 
 <?= $this->section("body") ?>
     <div class="container">
