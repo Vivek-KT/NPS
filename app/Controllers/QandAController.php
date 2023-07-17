@@ -17,7 +17,7 @@ class QandAController extends BaseController
         $data = [];
         if ($this->request->getMethod() == 'post') {
                 $rules = [
-                    'question' => 'required|min_length[2]|max_length[50]',
+                    'question' => 'required|min_length[2]|max_length[100]',
                     'qinfo' => 'required|min_length[2]|max_length[100]',
                 ];
                 $errors = [
@@ -119,7 +119,7 @@ class QandAController extends BaseController
 
         if ($this->request->getMethod() == 'post') {
             $rules = [
-                'question' => 'required|min_length[2]|max_length[50]',
+                'question' => 'required|min_length[2]|max_length[100]',
                 'qinfo' => 'required|min_length[2]|max_length[100]',
             ];
             $errors = [

@@ -2,11 +2,10 @@
 
 <?= $this->section("body") ?>
 
-<div id="wrapper">
     <?php include APPPATH.'views/layouts/sidebar.php';?>
 
-    <div id="content-wrapper">
-        <div class="container-fluid">
+    <section class="home">
+        <div class="container">
             <!-- Breadcrumbs-->
           <?php include APPPATH.'views/layouts/breadcrumb.php';?>       
           <!-- Icon Cards-->
@@ -15,11 +14,10 @@
    <h3>Welcome Back : <?= session()->get('firstname')." ".session()->get('lastname') ?> </h3>
             </div>
         </div>
-    </div>
+</section>
 
     <canvas id="myChart" width="400" height="400"></canvas>
 
-</div>
 
 
 <?= $this->endSection() ?>t

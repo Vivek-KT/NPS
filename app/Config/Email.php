@@ -114,4 +114,13 @@ class Email extends BaseConfig
      * Enable notify message from server
      */
     public bool $DSN = false;
+    public $config = Array(
+        'protocol' => 'smtp',
+        'smtp_host' => 'sandbox.smtp.mailtrap.io',
+        'smtp_port' => 2525,
+        'smtp_user' => '8ade7d64119bd7',
+        'smtp_pass' => '********ce1d',
+        'crlf' => "\r\n",
+        'newline' => "\r\n"
+      );
 }
