@@ -153,7 +153,7 @@
         var start = moment().subtract(32, 'days');
         var end = moment();
         function cb(start, end) {
-            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+            $('#reportrange span').html(start.format('DD-MMMM-YYYY') + ' - ' + end.format('DD-MMMM-YYYY'));
         }
         $('#reportrange').daterangepicker({
             startDate: start,
@@ -169,8 +169,6 @@
         }, cb);
         cb(start, end);
         $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
-            console.log(picker.startDate.format('YYYY-MM-DD'));
-            console.log(picker.endDate.format('YYYY-MM-DD'));
             var startdate = picker.startDate.format('YYYY-MM-DD');
             var enddate = picker.endDate.format('YYYY-MM-DD');
             var daterange = startdate+"_"+enddate;
@@ -335,13 +333,6 @@
         var responserate = (totalresponse > 0) ? Math.round((getsurveyresponse/totalresponse) * 100) + "%" : Math.round((totalNPS/3) * 100) + "%";
         var Npsresponse = (totalresponse > 0) ? Math.round((getsurveyresponse/totalresponse) * 100 ) + "%": Math.round((getsurveyresponse) * 100) + "%";
         
-        console.log(passives);
-        console.log(promotor);
-        console.log(detractors);
-        console.log(totalNPS);
-        console.log(getsurveyresponse);
-        console.log(totalresponse);
-        console.log(responserate);
         // NPS Score
         var ctx = $("#chart-line");
         var myLineChart = new Chart(ctx, {

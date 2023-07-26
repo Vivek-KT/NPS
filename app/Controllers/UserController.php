@@ -19,12 +19,12 @@ class UserController extends BaseController
             $rules = [
                 'tenantname' => 'required|min_length[2]|max_length[50]',
                 'email' => 'required|min_length[6]|max_length[50]|valid_email',
-                'password' => 'required|min_length[4]|max_length[255]|validateUser[email,password]',
+                'password' => 'required|min_length[4]|max_length[255]|validateUser[tenantname,email,password]',
             ];
 
             $errors = [
                 'password' => [
-                    'validateUser' => "Email or Password didn't match",
+                    'validateUser' => "Email/Tenant/Password didn't match",
                 ],
             ];
 
