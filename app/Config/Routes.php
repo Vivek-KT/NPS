@@ -98,6 +98,8 @@ $routes->match(['get', 'post'], 'getSurveyAnwser/(:any)/(:any)/(:any)/(:any)', '
 $routes->get('getSurveyAnwser/(:any)/(:any)/(:any)/(:any)', 'EmailTemplateController::getSurveyAnwser/$1/$2/$3/$4');
 $routes->match(['get', 'post'], 'createsurveyanswer', 'EmailTemplateController::createsurveyanswer');
 
+$routes->match(['get', 'post'], 'SurveyResponse', 'SurveyResponseController::index', ["filter" => "auth"]);
+
 $routes->get('SurveyResponse', 'SurveyResponseController::index', ["filter" => "auth"]);
 
 
@@ -118,3 +120,4 @@ $routes->get('SurveyResponse', 'SurveyResponseController::index', ["filter" => "
 if (is_file(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php')) {
     require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
 }
+

@@ -15,8 +15,16 @@ class SurveyResponseController extends BaseController
 {
     public function index()
     {
-        $model = new AnswercreateModel();  
-        $getSurveyData = $model->where('user_id', session()->get('id'))->find(); 
+        $model = new SurveyModel();  
+        $getsurveyList = $model->where('user_id', session()->get('id'))->find(); 
+        $getsurveyfirst = $model->where('user_id', session()->get('id'))->first(); 
+        $camp_id = isset($getsurveyfirst) ? $getsurveyfirst['campign_id'] : '';
+        if ($this->request->getMethod() == 'post') {
+            $camp_id =  $this->request->getPost("surveyid");
+        }
+        $model = new AnswercreateModel();
+        $multiClause = array('user_id' => session()->get('id'),'campign_id' => $camp_id);  
+        $getSurveyData = $model->where($multiClause)->find(); 
         $getfullcollection = array();
         foreach($getSurveyData as $key => $getdata){
             $model = new QuestionModel();  
@@ -41,9 +49,8 @@ class SurveyResponseController extends BaseController
             ];            
             array_push($getfullcollection, $getSurveycollection);
 
-        }
-        // echo "<pre>";  print_r($getfullcollection); echo "</pre>";
-
-         return view('admin/surveyresponselist',['getSurveyData' =>  $getfullcollection ]); 
+        }     
+        return view('admin/surveyresponselist',['getSurveyData' =>  $getfullcollection, "getsurveylist" => $getsurveyList, "selectsurvey" => $getsurveyfirst]); 
     }
+   
 }

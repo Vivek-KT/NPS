@@ -2,11 +2,37 @@
 <?= $this->section("body") ?>
 <?php include APPPATH.'views/layouts/sidebar.php';?>
 <?php echo script_tag('js/jquery.min.js'); ?>
+<script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
     <section class="home">
         <div class="container">
             <div class="row">
+            <?php if(session()->get('tenant_id') == 1) { ?> 
+            <div class="col-xl-8 col-lg-8 col-md-8"></div>
+            <div class="col-xl-4 col-lg-4 col-md-4 float-right">
+                <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="tenant" id="tenantchange">
+                <?php foreach($getdashData['getTenantdata'] as $getTenantlist) { ?> 
+                    <option value="<?php echo $getTenantlist['tenant_id'] ; ?>" <?php if($getdashData['selectTenant'] ==  $getTenantlist['tenant_id']): ?>selected="selected" <?php endif; ?>><?php echo $getTenantlist['tenant_name'] ; ?></option>
+                  <?php  } ?>
+                  </select>
+            </div>
+            <?php } ?>
+            </div>
+            <div class="row mt-3">
+                <div class="col-xl-8 col-lg-8 col-md-8">
+                    <h1>Dashboard - Live</h1>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-4">
+                    <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                    <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+                    <span></span> <b class="caret"></b>
+                    </div>
+                </div>
+        </div>
+            <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12">
-                    <h6 class="header-dashboard">CSAT/Dashboard</h6>                    
                     <div class="card">
                         <div class="card-body">
                             <div class="mb-3 row">
@@ -58,23 +84,131 @@
                     </div> -->
                     <canvas id="chartId" aria-label="chart" height="350" width="580"></canvas>
                 </div>
-                <div class="col-xl-6 col-lg-6 col-md-6">
-                    <p class="response-head-1">
-                        CSAT By Country
-                    </p>
-                    <div class="col-2-right">
-                        <button>progress<?php $imageProperties = ['src' => 'images/Icon.svg']; 
-                            echo img($imageProperties); ?></button>
+                <div class="col-xl-6 col-lg-6 col-md-6 mt-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="mb-1 row">
+                            <div class="col-xl-12 col-lg-12 col-md-12">
+                            <table class="table mt-6 ">
+                                <thead>
+                                    <tr>
+                                    <th scope="row"><p class="response-head-1">NPS Summary</p></th>
+                                    <th scope="row"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td scope="row">
+                                    <p class="">Promoters</p>
+                                    </td>
+                                    <td scope="row">
+                                    <p class="text-center"><?php echo count($getdashData['promoters']); ?></p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td scope="row">
+                                    <p class="">Passives</p>
+                                    </td>
+                                    <td scope="row">
+                                    <p class="text-center"><?php echo count($getdashData['passives']); ?></p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td scope="row">
+                                    <p class="">Detractors</p>
+                                    </td>
+                                    <td scope="row">
+                                    <p class="text-center"><?php echo count($getdashData['detractors']); ?></p>
+                                    </td>
+                                </tr>                                       
+                                <tr>
+                                    <td scope="row">
+                                    <p class="">Total Sents</p>
+                                    </td>
+                                    <td scope="row">
+                                    <p class="text-center"><?php echo $getdashData['totalresponse']; ?></p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td scope="row">
+                                    <p class="">Total Response</p>
+                                    </td>
+                                    <td scope="row">
+                                    <p class="text-center"><?php echo $getdashData['getsurveyresponse']; ?></p>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
                     </div>
-                    <div class="res-cou-2">
-                        <h2>content</h2>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.bundle.min.js'></script>
-    <script>
+    <script type="text/javascript">
+    $(function() {
+        var start = moment().subtract(32, 'days');
+        var end = moment();
+        function cb(start, end) {
+            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+        }
+        $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+        }, cb);
+        cb(start, end);
+        $('#reportrange').on('apply.daterangepicker', function(ev, picker) {
+            console.log(picker.startDate.format('YYYY-MM-DD'));
+            console.log(picker.endDate.format('YYYY-MM-DD'));
+            var startdate = picker.startDate.format('YYYY-MM-DD');
+            var enddate = picker.endDate.format('YYYY-MM-DD');
+            var daterange = startdate+"_"+enddate;
+            var newUrl = '';
+            var currLoc = $(location).attr('href');
+            var hashes =  window.location.href.indexOf("?");    
+            if(hashes == -1) {
+                var currentUrl = window.location.href +"?daterange="+daterange;
+                var urls = new URL(currentUrl);
+                newUrl = urls.href; 
+            }else {
+                var currentUrl = window.location.href;
+                var urls = new URL(currentUrl);
+                urls.searchParams.set("daterange", daterange); // setting your param
+                newUrl = urls.href; 
+            }
+            console.log(newUrl);
+            window.location.href =  newUrl;
+        });
+    });
+    
+    $("#tenantchange").change(function(){
+        var t_id= $(this).val();
+        var newUrl = '';
+        var currLoc = $(location).attr('href');
+        var hashes =  window.location.href.indexOf("?");    
+        if(hashes == -1) {
+            var currentUrl = window.location.href +"?tenantId="+t_id;
+            var urls = new URL(currentUrl);
+            newUrl = urls.href; 
+        }else {
+            var currentUrl = window.location.href;
+            var urls = new URL(currentUrl);
+            urls.searchParams.set("tenantId", t_id); // setting your param
+            newUrl = urls.href; 
+        }
+        window.location.href =  newUrl;
+    });
     $(document).ready(function() {
         Chart.pluginService.register({
       beforeDraw: function(chart) {
@@ -89,7 +223,8 @@
           var color = centerConfig.color || '#000';
           var maxFontSize = centerConfig.maxFontSize || 75;
           var sidePadding = centerConfig.sidePadding || 20;
-          var sidePaddingCalculated = (sidePadding / 100) * (chart.innerRadius * 2)
+          var sidePaddingCalculated = (sidePadding / 100) * (chart.innerRadius * 2);
+          
           // Start with a base font of 30px
           ctx.font = "30px " + fontStyle;
 
@@ -99,7 +234,7 @@
 
           // Find out how much the font can grow in width.
           var widthRatio = elementWidth / stringWidth;
-          var newFontSize = Math.floor(30 * widthRatio);
+          var newFontSize = Math.floor(15 * widthRatio);
           var elementHeight = (chart.innerRadius * 2);
 
           // Pick a new font size so it will not be larger than the height of label.
@@ -119,16 +254,26 @@
 
           // Set font settings to draw it correctly.
           ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
+          ctx.textBaseline = 'bottom';
           var centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
           var centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
           ctx.font = fontSizeToUse + "px " + fontStyle;
           ctx.fillStyle = color;
-
+          ctx.beginPath();
+          var sub = centerX - 50;
+          var hsub = centerY +10;
+          ctx.moveTo(sub,hsub);
+          var add = centerX +50;
+          ctx.lineTo(add,hsub);
+          ctx.lineWidth = 5;
+          // set line color
+          ctx.strokeStyle = '#FF6384';
+          ctx.stroke();   
           if (!wrapText) {
             ctx.fillText(txt, centerX, centerY);
             return;
           }
+          
 
           var words = txt.split(' ');
           var line = '';
@@ -156,6 +301,27 @@
           }
           //Draw text in center
           ctx.fillText(line, centerX, centerY);
+          console.log(centerX);
+          console.log(centerY);
+
+        }
+      },
+      afterDraw: function(chart) {
+        var ctx = chart.chart.ctx; 
+        
+        if (chart.data.datasets.length === 0) {
+            // No data is present
+        var ctx = chart.chart.ctx;
+        var width = chart.chart.width;
+        var height = chart.chart.height
+        chart.clear();
+        
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = "16px normal 'Helvetica Nueue'";
+        ctx.fillText('No data to display', width / 2, height / 2);
+        ctx.restore();
         }
       }
     });
@@ -164,10 +330,19 @@
         var detractors  = "<?php echo count($getdashData['detractors']); ?>";
         var getsurveyresponse  = "<?php echo $getdashData['getsurveyresponse']; ?>";
         var totalresponse  = "<?php echo $getdashData['totalresponse']; ?>";
-        var responserate = Math.round((getsurveyresponse/totalresponse) * 100) + "%";
+        var totalNPS = parseInt(promotor) + parseInt(passives)  + parseInt(detractors);
+        // 9/10
+        var responserate = (totalresponse > 0) ? Math.round((getsurveyresponse/totalresponse) * 100) + "%" : Math.round((totalNPS/3) * 100) + "%";
+        var Npsresponse = (totalresponse > 0) ? Math.round((getsurveyresponse/totalresponse) * 100 ) + "%": Math.round((getsurveyresponse) * 100) + "%";
         
-        console.log(barchartData);
+        console.log(passives);
+        console.log(promotor);
+        console.log(detractors);
+        console.log(totalNPS);
+        console.log(getsurveyresponse);
+        console.log(totalresponse);
         console.log(responserate);
+        // NPS Score
         var ctx = $("#chart-line");
         var myLineChart = new Chart(ctx, {
             type: 'doughnut',
@@ -182,6 +357,16 @@
                 title: {
                     display: true,
                     text: 'Net Promotion Score'
+                },
+                elements: {
+                    center: {
+                        text: responserate,
+                        color: '#FF6384', // Default is #000000
+                        fontStyle: 'Arial', // Default is Arial
+                        sidePadding: 20, // Default is 20 (as a percentage)
+                        minFontSize: 25, // Default is 20 (in px), set to false and text will not wrap.
+                        lineHeight: 25 // Default is 25 (in px), used for when text wraps
+                    }
                 }
             }
         });
@@ -203,7 +388,7 @@
                 },
                 elements: {
                     center: {
-                        text: responserate,
+                        text: Npsresponse,
                         color: '#FF6384', // Default is #000000
                         fontStyle: 'Arial', // Default is Arial
                         sidePadding: 20, // Default is 20 (as a percentage)
