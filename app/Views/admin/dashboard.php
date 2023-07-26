@@ -213,12 +213,13 @@
         if (chart.config.options.elements.center) {
           // Get ctx from string
           var ctx = chart.chart.ctx;
-
           // Get options from the center object in options
           var centerConfig = chart.config.options.elements.center;
           var fontStyle = centerConfig.fontStyle || 'Arial';
           var txt = centerConfig.text;
-          var color = centerConfig.color || '#000';
+          var txt2 = centerConfig.text2;
+          var state = centerConfig.state;
+          var color = centerConfig.color || 'green';
           var maxFontSize = centerConfig.maxFontSize || 75;
           var sidePadding = centerConfig.sidePadding || 20;
           var sidePaddingCalculated = (sidePadding / 100) * (chart.innerRadius * 2);
@@ -255,20 +256,33 @@
           ctx.textBaseline = 'bottom';
           var centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
           var centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
-          ctx.font = fontSizeToUse + "px " + fontStyle;
-          ctx.fillStyle = color;
+          
           ctx.beginPath();
           var sub = centerX - 50;
           var hsub = centerY +10;
           ctx.moveTo(sub,hsub);
           var add = centerX +50;
           ctx.lineTo(add,hsub);
-          ctx.lineWidth = 5;
+          ctx.lineWidth = 1;
           // set line color
-          ctx.strokeStyle = '#FF6384';
+          ctx.strokeStyle = 'black';
           ctx.stroke();   
           if (!wrapText) {
-            ctx.fillText(txt, centerX, centerY);
+            ctx.fillStyle = 'black';
+            ctx.font = fontSizeToUse + "px " + fontStyle;
+            ctx.fillText(txt, centerX, centerY);    
+            ctx.fillStyle = color;      
+            ctx.font = "20px " + fontStyle;  
+            ctx.fillText(txt2, centerX, centerY+45);
+            var image = new Image();
+            if(state == "increase"){
+                image.src = 'images/growth.png';
+            } else {
+                image.src = 'images/down.png';
+            }
+            image.onload = () => {
+            ctx.drawImage(image, centerX+20, centerY+20)
+            }            
             return;
           }
           
@@ -294,10 +308,12 @@
           centerY -= (lines.length / 2) * lineHeight;
 
           for (var n = 0; n < lines.length; n++) {
+
             ctx.fillText(lines[n], centerX, centerY);
             centerY += lineHeight;
           }
           //Draw text in center
+
           ctx.fillText(line, centerX, centerY);
           console.log(centerX);
           console.log(centerY);
@@ -328,11 +344,16 @@
         var detractors  = "<?php echo count($getdashData['detractors']); ?>";
         var getsurveyresponse  = "<?php echo $getdashData['getsurveyresponse']; ?>";
         var totalresponse  = "<?php echo $getdashData['totalresponse']; ?>";
+        // second text value
         var totalNPS = parseInt(promotor) + parseInt(passives)  + parseInt(detractors);
+        var totalDet =  Math.round((detractors/totalNPS) * 100) + "%";
+        var totalRR = parseInt(totalresponse) + parseInt(getsurveyresponse);
+        var totalrespreturn=  Math.round((getsurveyresponse/totalRR) * 100) + "%";
+
         // 9/10
         var responserate = (totalresponse > 0) ? Math.round((getsurveyresponse/totalresponse) * 100) + "%" : Math.round((totalNPS/3) * 100) + "%";
         var Npsresponse = (totalresponse > 0) ? Math.round((getsurveyresponse/totalresponse) * 100 ) + "%": Math.round((getsurveyresponse) * 100) + "%";
-        
+        console.log(totalrespreturn);
         // NPS Score
         var ctx = $("#chart-line");
         var myLineChart = new Chart(ctx, {
@@ -352,7 +373,9 @@
                 elements: {
                     center: {
                         text: responserate,
-                        color: '#FF6384', // Default is #000000
+                        text2: totalDet,
+                        state: 'increase',
+                        color: '#00FF80', // Default is #000000
                         fontStyle: 'Arial', // Default is Arial
                         sidePadding: 20, // Default is 20 (as a percentage)
                         minFontSize: 25, // Default is 20 (in px), set to false and text will not wrap.
@@ -380,6 +403,7 @@
                 elements: {
                     center: {
                         text: Npsresponse,
+                        text2: totalrespreturn,
                         color: '#FF6384', // Default is #000000
                         fontStyle: 'Arial', // Default is Arial
                         sidePadding: 20, // Default is 20 (as a percentage)
