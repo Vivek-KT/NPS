@@ -8,6 +8,26 @@
         <div class="container">
         <!-- Breadcrumbs-->
     <?php include APPPATH.'views/layouts/breadcrumb.php';?> 
+    <h1>Survey Response</h1>
+    <hr>  
+    <form class="form-horizontal" action="<?= base_url('SurveyResponse') ?>" method="post">
+
+    <div class="row mb-4">
+        <div class="col-xl-6 col-lg-6 col-md-6">
+            <div class="row">
+                <div class="col-xl-6 col-lg-6 col-md-6">
+                <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="surveyid" >
+                <?php foreach($getsurveylist as $getsurveys) { ?> 
+                    <option value="<?php echo $getsurveys['campign_id'] ; ?>" <?php if($getsurveys['campign_id'] == $selectsurvey['campign_id']) { ?> selected ="selected" <?php }  ?>><?php echo $getsurveys['campain_name'] ; ?></option>
+                  <?php  } ?>
+                  </select>
+                </div>
+                <div class="col-xl-6 col-lg-6 col-md-6">
+                <input type="submit" name="submit" id="submit" class="btn btn-primary btn-block" value="Filter" /> 
+                </div>
+            </div>
+        </div>
+    </div>
     <table class="table mt-6 table-striped table-bordered">
   <tbody>
     <?php foreach($getSurveyData as $getSurveylist) { 
@@ -42,6 +62,7 @@
     <?php } ?>
 </tbody>
 </table>
+    </form>
     </div>
   </section>
     <?= $this->endSection() ?>

@@ -15,11 +15,26 @@ class EmailTemplateController extends BaseController
 {
     public function index()
     {
-        $model = new ExternalcontactsModel(); 
-        $externalList = $model->where('created_by', session()->get('id'))->find();    
+        $externalList = $this->getSurveycontactdata();
         $model = new SurveyModel();  
         $getSurvey = $model->where('user_id', session()->get('id'))->find(); 
         return view('admin/emailtemplate',["getSurvey" => $getSurvey,"externalList" => $externalList]);
+    }
+    public function getSurveycontactdata(){
+        if(session()->get('tenant_id') == 1 ){
+            $model = new ExternalcontactsModel(); 
+            return $externalList = $model->where('created_by', session()->get('id'))->find();
+        } else {
+            $dbname = "nps_".session()->get('tenant_name');     
+            //new DB creation for Tenant details
+            $db = db_connect();
+            $db->query('USE '.$dbname);
+            $new_db_select ="SELECT * FROM ".$dbname.".nps_external_contacts ";
+            $result = $db->query($new_db_select);
+            if(count($result->getResult()) > 0) {
+               return $externalList =json_decode(json_encode($result->getResult()),true);
+            }
+        } 
     }
     public function uploadFile(){
         $input = $this->validate([
@@ -81,13 +96,26 @@ class EmailTemplateController extends BaseController
         }
     }
     public function getExternalContact($emailid){
-        $model = new ExternalcontactsModel();
-        $multiClause = array('email_id' => $emailid);
-        $contactlist = $model->where($multiClause)->first();
-        if($contactlist){
-            return false;
+        if(session()->get('tenant_id') > 1 ){
+            $dbname = "nps_".session()->get('tenant_name');     
+            //new DB creation for Tenant details
+            $db = db_connect();
+            $db->query('USE '.$dbname);
+            $new_db_select ="SELECT * FROM ".$dbname.".nps_external_contacts  WHERE `nps_external_contacts`.`email_id` = '". $emailid."'";
+            $result = $db->query($new_db_select);
+            if(count($result->getResult()) > 0) {
+                return false;
+            }
+            return true;
+        }else {
+            $model = new ExternalcontactsModel();
+            $multiClause = array('email_id' => $emailid);
+            $contactlist = $model->where($multiClause)->first();
+            if($contactlist){
+                return false;
+            }
+            return true;
         }
-        return true;
     }
     public function createContact($exportData){
 
@@ -100,7 +128,7 @@ class EmailTemplateController extends BaseController
         }
     }
     public function tenantCreateContact($exportData, $tenantdata) {
-        $dbname = "nps_".$tenantdata['tenant_name'];        
+        $dbname = "nps_".$tenantdata['tenant_name'];     
         //new DB creation for Tenant details
         $db = db_connect();
         $db->query('USE '.$dbname);
@@ -114,13 +142,20 @@ class EmailTemplateController extends BaseController
         }
     }
     public function sendEmail(){
-        $model = new ExternalcontactsModel(); 
-        $externalList = $model->where('created_by', session()->get('id'))->find(); 
+        $externalList = $this->getSurveycontactdata();
         $model = new SurveyModel();  
         $getSurvey = $model->where('user_id', session()->get('id'))->find(); 
         if ($this->request->getMethod() == 'post') {
             $userId = session()->get('id');
-            $this->createMailTemplate($this->request->getPost(),$userId);
+            $tenant  = [
+                "tenant_id" => session()->get('tenant_id'),
+                "tenant_name" =>  session()->get('tenant_name')
+            ];
+            if($tenant['tenant_id'] == 1) {
+                $this->createMailTemplate($this->request->getPost(),$userId);
+            } else {
+                $this->createMailTemplatesubTenant($this->request->getPost(),$userId, $tenant);
+            }
             session()->setFlashdata('response',"Email has been send and record properly");
             return view('admin/emailtemplate',["getSurvey" => $getSurvey,"externalList" => $externalList]);
         }
@@ -139,12 +174,83 @@ class EmailTemplateController extends BaseController
         ];
         $result = $model->insertBatch([$data]);
     }
+    public function createMailTemplatesubTenant($postData, $userId, $tenant) {
+        $dbname = "nps_".$tenant['tenant_name'];
+        //new DB creation for Tenant details
+        $db = db_connect();
+        $db->query('USE '.$dbname);
+        $List = implode(', ', $postData["checkoutemail"]);
+        $data = [
+            "subject" => $postData["subject"],
+            "survey_id" => $postData["survey"],
+            "email_list" => $List,
+            "message" => $postData["editor"],
+            "user_id" => $userId
+        ];
+        $key = array_keys($data); 
+        $values = array_values($data); 
+        $new_db_insert_user ="INSERT INTO ".$dbname.".nps_email_send_list ( ". implode(',' , $key) .") VALUES('". implode("','" , $values) ."')";
+        $db->query($new_db_insert_user);
+
+    }
     public function getSurveyAnwser($email, $survey_id, $userid, $tenantid)
     {
-        $getSurveyData = $this->getcollection($email, $survey_id, $userid, $tenantid);
+        if($tenantid > 1) {
+            $getSurveyData = $this->getcollectionsubtenant($email, $survey_id, $userid, $tenantid);
+        } else {
+            $getSurveyData = $this->getcollection($email, $survey_id, $userid, $tenantid);
+        }
         return view('validateanswer',["getSurveyData" => $getSurveyData]);
     }
+    public function getcollectionsubtenant($email, $survey_id, $userid, $tenantid) {
+        $model = new TenantModel();
+        $tenant = $model->where('tenant_id', $tenantid)->first();
+        $dbname = "nps_".$tenant['tenant_name'];     
+        //new DB creation for Tenant details
+        $db = db_connect();
+        $db->query('USE '.$dbname);
+        $multiClause ="SELECT * FROM ".$dbname.".nps_external_contacts  WHERE `nps_external_contacts`.`email_id` = '". $email."' AND `nps_external_contacts`.`created_by` = '". $userid."'";
+        $externalcount = $db->query($multiClause);
+        if(count($externalcount->getRowArray()) >0) {
+            $externalList = $externalcount->getRowArray();
+        }
+        $multiClause2 ="SELECT * FROM ".$dbname.".nps_survey_details  WHERE `nps_survey_details`.`campign_id` = '". $survey_id."' AND `nps_survey_details`.`user_id` = '". $userid."'";
+        $getSurveycount = $db->query($multiClause2);
+        if(count($getSurveycount->getRowArray()) >0) {
+            $getSurvey = $getSurveycount->getRowArray();
+        }
+        $multiClause3 ="SELECT * FROM ".$dbname.".nps_question_details  WHERE `nps_question_details`.`user_id` = '". $userid."' AND `nps_question_details`.`question_id` = '". $getSurvey['question_id_1']."'";
+        $getquestion1list = $db->query($multiClause3);
+        if(count($getquestion1list->getRowArray()) >0) {
+            $getquestion1 = $getquestion1list->getRowArray();
+        }
+        $multiClause4 ="SELECT * FROM ".$dbname.".nps_question_details  WHERE `nps_question_details`.`user_id` = '". $userid."' AND `nps_question_details`.`question_id` = '". $getSurvey['question_id_2']."'";
+        $getquestion2list = $db->query($multiClause4);
+        if(count($getquestion2list->getRowArray()) >0) {
+            $getquestion2 = $getquestion2list->getRowArray();
+        }
+        $multiClause5 ="SELECT * FROM ".$dbname.".nps_users  WHERE `nps_users`.`id` = '". $userid."' AND `nps_users`.`tenant_id` = '". $tenantid."'";
+        $getuserlist = $db->query($multiClause5);
+        if(count($getuserlist->getRowArray()) >0) {
+            $user = $getuserlist->getRowArray();
+        }
+        $db->close(); 
+        $questioncollection = array();
+        array_push($questioncollection, $getquestion1, $getquestion2);
 
+        $getSurveyData  = [
+            "email_id" => $externalList['email_id'],
+            "contactId" => $externalList['id'],
+            "contactname" => $externalList['name'],
+            "campaignId" => $getSurvey['campign_id'],
+            "campaignname" => $getSurvey['campain_name'],
+            "questionlist" => $questioncollection,
+            "userData"  => $user,
+            "tenantData" => $tenant
+        ];
+        return $getSurveyData;
+        
+    }
     public function getcollection($email, $survey_id, $userid, $tenantid){
         $model = new ExternalcontactsModel(); 
         $multiClause = array('created_by' => $userid,'email_id' => $email);
@@ -188,7 +294,12 @@ class EmailTemplateController extends BaseController
                     'required' => 'You must choose a first question.',
                 ]
             ];
-             $getSurveyData = $this->getcollection($this->request->getPost('emailid'),$this->request->getPost('surveyid'), $this->request->getPost('userid'),$this->request->getPost('tenantid'));
+            
+            if($this->request->getPost('tenantid') > 1) {
+                $getSurveyData = $this->getcollectionsubtenant($this->request->getPost('emailid'),$this->request->getPost('surveyid'), $this->request->getPost('userid'),$this->request->getPost('tenantid'));
+            } else {
+                $getSurveyData = $this->getcollection($this->request->getPost('emailid'),$this->request->getPost('surveyid'), $this->request->getPost('userid'),$this->request->getPost('tenantid'));
+            }
              if (!$this->validate($rules, $errors)) {
                 return view('validateanswer', [
                     "validation" => $this->validator,
@@ -210,12 +321,29 @@ class EmailTemplateController extends BaseController
                     ];
                     $model = new AnswercreateModel();
                     $result = $model->insertBatch([$data]);
-
+                    $db = db_connect();        
+                    $surveyresponseId = $db->insertID();
+                    $data['id'] = $surveyresponseId;
+                    if($this->request->getPost('tenantid') > 1) {
+                        $this->AnswerReponseforSubTenant($this->request->getPost(),$data);
+                    }
                 session()->setFlashdata('response',"Your survey feedback has beed recorded.");
                 return view('validateanswer', ["getSurveyData" => $getSurveyData]);
             }
 
         }
 
+    }
+    public function AnswerReponseforSubTenant($postdata, $data){
+        $model = new TenantModel();
+        $tenant = $model->where('tenant_id', $postdata['tenantid'])->first();
+        $dbname = "nps_".$tenant['tenant_name'];  
+        $db = db_connect();
+        $db->query('USE '.$dbname);   
+        $key = array_keys($data); 
+        $values = array_values($data); 
+        $new_db_insert_user ="INSERT INTO ".$dbname.".nps_survey_response ( ". implode(',' , $key) .") VALUES('". implode("','" , $values) ."')";
+        $db->query($new_db_insert_user);
+        $db->close(); 
     }
 }

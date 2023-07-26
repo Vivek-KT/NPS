@@ -259,6 +259,10 @@ class UserController extends BaseController
         $updateId = $usersvalidate['id'];
         $data = [ "status" => 1 ];
         $statusupdate = $model->update($updateId,$data);
+        $tenantId = $usersvalidate["tenant_id"];
+        if($tenantId > 1){
+            $this->tenantUservalidate($data,$tenantId,$updateId);
+        }
         session()->setFlashdata('response',"Your account is activated.");
         return redirect()->to(base_url('login'));   
     }
@@ -314,6 +318,18 @@ class UserController extends BaseController
         $key = array_keys($data); 
         $values = array_values($data); 
         $new_db_update_user ="UPDATE  ".$dbname.".`nps_users` SET `password` = '".$data["password"]."' WHERE `nps_users`.`id` = ".$updateId;
+        $db->query($new_db_update_user);
+    }
+    public function tenantUservalidate($data, $tenantId, $updateId) {
+        $model = new TenantModel();
+        $tenant = $model->where('tenant_id', $tenantId)->first();
+        $dbname = "nps_".$tenant['tenant_name'];
+        //new DB updation for Tenant details
+        $db = db_connect();
+        $db->query('USE '.$dbname);
+        $key = array_keys($data); 
+        $values = array_values($data); 
+        $new_db_update_user ="UPDATE  ".$dbname.".`nps_users` SET `status` = 1, updated_at =now() WHERE `nps_users`.`id` = ".$updateId;
         $db->query($new_db_update_user);
     }
 }

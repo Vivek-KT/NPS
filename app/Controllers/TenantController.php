@@ -153,6 +153,17 @@ class TenantController extends BaseController
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
         $db->query($nps_campign_details);
 
+        $emailsendlist = "CREATE TABLE `nps_email_send_list` (
+            `id` int(11) NOT  NULL AUTO_INCREMENT PRIMARY KEY,
+            `survey_id` int(11) NOT NULL,
+            `user_id` int(11) NOT NULL,
+            `subject` varchar(120) NOT NULL,
+            `email_list` text NOT NULL,
+            `message` blob NOT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
+        $db->query($emailsendlist);
+
         $nps_external_contacts = "CREATE TABLE `nps_external_contacts` (
             `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `created_by` int(11) NOT NULL COMMENT 'User_id',
@@ -195,11 +206,14 @@ class TenantController extends BaseController
         $db->query($nps_survey_details);
 
         $nps_survey_response = "CREATE TABLE `nps_survey_response` (
-            `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `id` int(11) NOT  NULL AUTO_INCREMENT PRIMARY KEY,
             `campign_id` int(11) NOT NULL,
             `user_id` int(11) NOT NULL,
+            `email` varchar(120) NOT NULL,
             `question_id` int(11) NOT NULL,
             `answer_id` int(11) NOT NULL,
+            `question_id2` int(11) NOT NULL,
+            `answer_id2` int(11) NOT NULL,
             `ip_details` varchar(120) NOT NULL,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp()
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
