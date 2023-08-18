@@ -23,7 +23,6 @@ class QandAController extends BaseController
     }
     public function createQuestion(){
         $data = [];
-        print_r($this->answercollection);
 
         if ($this->request->getMethod() == 'post') {
                 $rules = [
@@ -66,7 +65,6 @@ class QandAController extends BaseController
             "other_option" => $postData["amswerdata"] ? json_encode($postData["amswerdata"]): '',
             "user_id" => $userId
         ];
-        // echo"<pre>";print_r($data);exit;
         $result = $model->insertBatch([$data]);
         $db = db_connect();        
         $questionId = $db->insertID();

@@ -248,7 +248,6 @@ class TenantController extends BaseController
     public function settingpage(){
         $model = new UserModel();
         $userdata = $model->where('email', session()->get('email'))->first();
-        // echo "<pre>";print_r($userdata); print_r($userdata['logo_update']);exit;
         $settingData = [
             "u_id" => $userdata['id'],
             "firstname" => $userdata['firstname'],

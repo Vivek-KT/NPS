@@ -71,7 +71,6 @@ class SurveyController extends BaseController
             "question_id_1" => $postData["quest_1"],
             "question_id_2" => $postData["quest_2"],
         ];
-        print_r($data); 
         $model->update($surv_id,$data);
     }
     public function tenantInsertSurvery($postData, $tenantdata, $surv_id, $userId){

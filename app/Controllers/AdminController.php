@@ -52,9 +52,6 @@ class AdminController extends BaseController
             $model->where("CAST(created_at AS DATE) BETWEEN '$daterange[0]' AND '$daterange[1]'");
         }
         $getSurveyData = $model->whereIn('user_id', $userId)->findall();  
-        // $db = db_connect(); 
-        // $query = $db->getLastQuery();
-        // print_r($query);
         $detractorsArray1  = array();
         $passivesArray1   = array();
         $promotersArray1  = array();
