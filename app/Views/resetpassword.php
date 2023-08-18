@@ -1,5 +1,4 @@
 <?= $this->extend("layouts/app_before"); ?>
-<?php //print_r($userdata); exit; ?>
 <?= $this->section("body") ?>
     <div class="container">
         <div class="card card-login mx-auto mt-5">
@@ -17,8 +16,8 @@
             <div class="card-body">
                 <?php $action= 'resetpwd?id='.$_GET['id']."&t_id=".$_GET['t_id']; ?>
         <form class="" action="<?= base_url($action); ?>" method="post">
-            <input type="text" class="form-control" name="userId" id="userId" value="<?php echo $_GET['id']; ?>">
-    <input type="text" class="form-control" name="tenant_id" id="tenant_id" value="<?php echo $_GET['t_id']; ?>">
+            <input type="hidden" class="form-control" name="userId" id="userId" value="<?php echo $_GET['id']; ?>">
+    <input type="hidden" class="form-control" name="tenant_id" id="tenant_id" value="<?php echo $_GET['t_id']; ?>">
                 <div class="form-group">
                     <div class="form-label-group">                        
                         <input type="password" class="form-control" name="password" id="password" value="<?php echo set_value('password'); ?>">
