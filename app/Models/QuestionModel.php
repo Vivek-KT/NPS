@@ -13,7 +13,7 @@ class QuestionModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ["question_name", "description", "info_details", "user_id"];
+    protected $allowedFields    = ["question_name", "description", "info_details","other_option" , "user_id"];
 
     // Dates
     protected $useTimestamps = false;

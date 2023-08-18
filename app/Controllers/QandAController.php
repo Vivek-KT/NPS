@@ -9,12 +9,22 @@ use App\Models\QuestionModel;
 
 class QandAController extends BaseController
 {
+    public $answercollection;
+
+    public function __construct()
+   {
+       // load config file if not autoloaded
+       $this->answercollection =  ["1" => 'Customer service', "2" => 'Free Shipping', "3" => 'Stock inventory', "4" => 'Order process', "5" => 'Quality',"6" => 'Work hours', "7" => 'in person visit',"8" => 'custom order',"9" => '24/7 support',"10" => 'Return policy'];
+   }
+
     public function index()
     {
-        return view('createquestion');
+        return view('createquestion',  ["answercollection" => $this->answercollection]);
     }
     public function createQuestion(){
         $data = [];
+        print_r($this->answercollection);
+
         if ($this->request->getMethod() == 'post') {
                 $rules = [
                     'question' => 'required|min_length[2]|max_length[100]',
@@ -43,7 +53,7 @@ class QandAController extends BaseController
                 return redirect()->to(base_url('questionList'));
             }
         }
-        return view('createquestion');
+        return view('createquestion' ,  ["answercollection" => $this->answercollection]);
 
     }
     public function insertQuestion($postData, $userId) 
@@ -53,8 +63,10 @@ class QandAController extends BaseController
             "question_name" => $postData["question"],
             "description" => $postData["qinfo"],
             "info_details" => $postData["amswer"],
+            "other_option" => $postData["amswerdata"] ? json_encode($postData["amswerdata"]): '',
             "user_id" => $userId
         ];
+        // echo"<pre>";print_r($data);exit;
         $result = $model->insertBatch([$data]);
         $db = db_connect();        
         $questionId = $db->insertID();
@@ -67,7 +79,8 @@ class QandAController extends BaseController
         $data = [
             "question_name" => $postData["question"],
             "description" => $postData["qinfo"],
-            "info_details" => $postData["amswer"]
+            "info_details" => $postData["amswer"],
+            "other_option" => $postData["amswerdata"] ? json_encode($postData["amswerdata"]): ''
         ];
         $model->update($question_id,$data);
     }
@@ -82,6 +95,7 @@ class QandAController extends BaseController
             "question_name" => $postData["question"],
             "description" => $postData["qinfo"],
             "info_details" => $postData["amswer"],
+            "other_option" => $postData["amswerdata"] ? json_encode($postData["amswerdata"]): '',
             "user_id" => $userId
         ];
         $key = array_keys($data); 
@@ -99,7 +113,8 @@ class QandAController extends BaseController
         $data = [
             "question_name" => $postData["question"],
             "description" => $postData["qinfo"],
-            "info_details" => $postData["amswer"]
+            "info_details" => $postData["amswer"],
+            "other_option" => $postData["amswerdata"] ? json_encode($postData["amswerdata"]): ''
         ];
         foreach($data as $key=>$val) {
             $cols[] = "$key = '$val'";
@@ -111,7 +126,7 @@ class QandAController extends BaseController
     public function questionList(){
         $model = new QuestionModel();    
         $questionList = $model->where('user_id', session()->get('id'))->find();       
-        return view('questionList', ["questionlist" => $questionList]);
+        return view('questionList', ["questionlist" => $questionList ,"answercollection" => $this->answercollection]);
     }
     public function editquestion($question_id) {
         $model = new QuestionModel();    
@@ -145,7 +160,7 @@ class QandAController extends BaseController
             return redirect()->to(base_url('questionList'));
         }
     }
-        return view('editquestion',  ["getQuestData" => $getQuestData]);
+        return view('editquestion',  ["getQuestData" => $getQuestData ,"answercollection" => $this->answercollection]);
     }
     public function deletequestion($q_id){
         $model = new QuestionModel();    

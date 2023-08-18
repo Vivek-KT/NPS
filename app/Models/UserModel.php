@@ -19,6 +19,7 @@ class UserModel extends Model
         "username",
         "tenant_id",
 		"email",
+		"logo_update",
 		"phone_no",
 		"password",
 		"role",

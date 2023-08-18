@@ -27,6 +27,7 @@ class AdminController extends BaseController
         $getTenantdata = $model->findall(); 
         // Filter concept
         $selectTenant = '';
+        $selectRange = '';
         if($this->request->getGet("tenantId") == '1' || $this->request->getGet("tenantId") == '' ) {
             $model = new UserModel();
             $userlist = $model->where('tenant_id', session()->get('tenant_id'))->findall();
@@ -38,6 +39,10 @@ class AdminController extends BaseController
         $daterange = '';
         if($this->request->getGet("daterange") != '' ) {
             $daterange = explode("_" , $this->request->getGet("daterange"));
+            $returnDate1 = date("d-F-Y", strtotime($daterange[0]));
+            $returnDate2 = date("d-F-Y", strtotime($daterange[1]));
+            $returnDate = $returnDate1."_".$returnDate2;
+            $selectRange = $returnDate;
         }
         foreach($userlist as $userarray){
             array_push($userId, $userarray['id']);
@@ -53,28 +58,17 @@ class AdminController extends BaseController
         $detractorsArray1  = array();
         $passivesArray1   = array();
         $promotersArray1  = array();
-        $detractorsArray2  = array();
-        $passivesArray2   = array();
-        $promotersArray2 = array();
         foreach($getSurveyData as $key => $getSurveylist) {
-            if($getSurveylist['answer_id'] >= 8) {
+            if($getSurveylist['answer_id'] > 8) {
                 array_push($promotersArray1, $getSurveylist['answer_id']);
-            }
-            if($getSurveylist['answer_id2'] >= 8) {
-                array_push($promotersArray2, $getSurveylist['answer_id2']);
-            }
-            if($getSurveylist['answer_id'] < 8 && $getSurveylist['answer_id'] >= 5) {
+            }            
+            if($getSurveylist['answer_id'] <= 8 && $getSurveylist['answer_id'] > 6) {
                 array_push($passivesArray1, $getSurveylist['answer_id']);
-            }
-            if($getSurveylist['answer_id2'] < 8 && $getSurveylist['answer_id2'] >= 5) {
-                array_push($passivesArray2, $getSurveylist['answer_id2']);
-            }
-            if($getSurveylist['answer_id'] < 5) {
+            }            
+            if($getSurveylist['answer_id'] <= 6) {
                 array_push($detractorsArray1, $getSurveylist['answer_id']);
             }
-            if($getSurveylist['answer_id2'] < 5) {
-                array_push($detractorsArray2, $getSurveylist['answer_id2']);
-            }
+            
         } 
         if($tenantId == 1){
             $model = new CreatecontactsModel();  
@@ -94,9 +88,9 @@ class AdminController extends BaseController
             }
             $db->close();    
         }
-        $promoters = array_merge($promotersArray1, $promotersArray2);
-        $passives = array_merge($passivesArray1, $passivesArray2);
-        $detractors = array_merge($detractorsArray1, $detractorsArray2);
+        $promoters = $promotersArray1;
+        $passives = $passivesArray1;
+        $detractors = $detractorsArray1;
         $completedData = array_merge($promoters, $passives, $detractors);
         // Response Rate
         if($tenantId == 1){
@@ -137,7 +131,8 @@ class AdminController extends BaseController
             "totalresponse" => $totalresponse,
             "getfullResponse" => $getfullResponse,
             "getTenantdata" => $getTenantdata,
-            "selectTenant" => $selectTenant
+            "selectTenant" => $selectTenant,
+            "selectRange" => $selectRange
         ];
         return view("admin/dashboard", ["getdashData" => $data]);
     }

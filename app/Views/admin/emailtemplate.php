@@ -1,7 +1,7 @@
 <?= $this->extend("layouts/app") ?>
 
 <?= $this->section("body") ?>
-<?php include APPPATH.'views/layouts/sidebar.php';?>
+<?php include APPPATH.'Views/layouts/sidebar.php';?>
 
 
 <?php echo script_tag('js/editor/jquery-3.6.0.min.js'); ?>
@@ -12,7 +12,7 @@
 <section class="home">
         <div class="container">
         <!-- Breadcrumbs-->
-    <?php include APPPATH.'views/layouts/breadcrumb.php';?>  
+    <?php include APPPATH.'Views/layouts/breadcrumb.php';?>  
     <!-- Page Content -->
     <h1>Email Template Option</h1>
     <hr>    
@@ -94,7 +94,8 @@
             <div class="panel panel-primary" id="result_panel">
                 <div class="panel-body">
                   <ul class="list-group" id="append_list">
-                    <?php foreach($externalList as $externalData) { ?>
+                    <?php ?>
+                    <?php if($externalList) { foreach($externalList as $externalData) { ?>
                     <li class="list-group-item">
                       <div class="container">
                         <div class= "row">
@@ -107,7 +108,7 @@
                         </div>
                       </div>
                     </li>
-                    <?php  }  ?>  
+                    <?php  }  } ?>  
                   </ul>
                 </div>
             </div>
@@ -179,7 +180,7 @@ tinymce.init({
     selector: '#editor',
     setup: function (editor) {
       editor.on('init', function (e) {
-        editor.setContent('<p>Thanks and cheers to having been part of our team.</p><p>We wholeheartedly appreciate your efforts.</p><p>We`d be super glad to have your feedback</p>');
+        editor.setContent('<p>Thanks and cheers to having been part of our team.</p><p>We wholeheartedly appreciate your efforts.</p><p>We`d be super glad to have your feedback</p><p></p>');
       });
     }
   });

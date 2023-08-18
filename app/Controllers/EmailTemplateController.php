@@ -10,6 +10,9 @@ use App\Models\SurveyModel;
 use App\Models\ExternalcontactsModel;
 use App\Models\CreatecontactsModel;
 use App\Models\AnswercreateModel;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 
 class EmailTemplateController extends BaseController
 {
@@ -156,10 +159,52 @@ class EmailTemplateController extends BaseController
             } else {
                 $this->createMailTemplatesubTenant($this->request->getPost(),$userId, $tenant);
             }
-            session()->setFlashdata('response',"Email has been send and record properly");
-            return view('admin/emailtemplate',["getSurvey" => $getSurvey,"externalList" => $externalList]);
+            foreach($this->request->getPost('checkoutemail') as $listMail) {
+                $emailstatus = $this->createTemplateForSurvey($this->request->getPost(),$userId, $listMail, $tenant);
+            }
+            session()->setFlashdata('response',$emailstatus);
+            return redirect()->to(base_url('emailtemplate'));
         }
         return view('admin/emailtemplate',["getSurvey" => $getSurvey,"externalList" => $externalList]);
+    }
+
+    public function createTemplateForSurvey($postdata, $userId, $email, $tenant){
+
+        $model = new ExternalcontactsModel();
+        $multiClause = array('email_id' => $email);
+        $contactlist = $model->where($multiClause)->first();
+        $template = view("template/email-template-survey", [ "userId" => $userId, "postdata" => $postdata,"contactdata" => $contactlist, "tenantdata" => $tenant]); 
+        $mail = new PHPMailer(true);          
+        try {
+            
+            $mail->isSMTP();  
+            $mail->addCustomHeader('MIME-Version: 1.0');
+            $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
+            $mail->SMTPDebug    = 1;
+            $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
+            $mail->SMTPAuth     = true;     
+            $mail->Username     = 'hctoolssmtp@gmail.com';  
+            $mail->Password     = 'iyelinyqlqdsmhro';
+            $mail->SMTPSecure   = 'tls';  
+            $mail->Port         = 587;  
+            $mail->Subject      = $postdata['subject'] ? $postdata['subject']  :"What did you think about NPS";
+            $mail->Body         = $template;
+            $mail->setFrom('hctoolssmtp@gmail.com', 'CI-NPS');
+            $mail->addAddress($email);  
+            $mail->isHTML(true);      
+            
+            if(!$mail->send()) {
+                return "Something went wrong. Please try again.". $mail->ErrorInfo;
+            }
+            else {
+                return "Email sent successfully.";
+            }
+            print_r($contactlist); 
+        } catch (Exception $e) {
+            return "Something went wrong." . $mail->ErrorInfo;
+        }
+    
+
     }
     public function createMailTemplate($postData, $userId) 
     {
@@ -224,11 +269,6 @@ class EmailTemplateController extends BaseController
         if(count($getquestion1list->getRowArray()) >0) {
             $getquestion1 = $getquestion1list->getRowArray();
         }
-        $multiClause4 ="SELECT * FROM ".$dbname.".nps_question_details  WHERE `nps_question_details`.`user_id` = '". $userid."' AND `nps_question_details`.`question_id` = '". $getSurvey['question_id_2']."'";
-        $getquestion2list = $db->query($multiClause4);
-        if(count($getquestion2list->getRowArray()) >0) {
-            $getquestion2 = $getquestion2list->getRowArray();
-        }
         $multiClause5 ="SELECT * FROM ".$dbname.".nps_users  WHERE `nps_users`.`id` = '". $userid."' AND `nps_users`.`tenant_id` = '". $tenantid."'";
         $getuserlist = $db->query($multiClause5);
         if(count($getuserlist->getRowArray()) >0) {
@@ -236,7 +276,7 @@ class EmailTemplateController extends BaseController
         }
         $db->close(); 
         $questioncollection = array();
-        array_push($questioncollection, $getquestion1, $getquestion2);
+        array_push($questioncollection, $getquestion1);
 
         $getSurveyData  = [
             "email_id" => $externalList['email_id'],
@@ -260,11 +300,9 @@ class EmailTemplateController extends BaseController
         $getSurvey = $model->where($multiClause2)->first(); 
         $model = new QuestionModel();
         $multiClause3 = array('user_id' => $userid,'question_id' => $getSurvey['question_id_1']); 
-        $multiClause4 = array('user_id' => $userid,'question_id' => $getSurvey['question_id_2']);  
         $getquestion1 = $model->where($multiClause3)->first(); 
-        $getquestion2 = $model->where($multiClause4)->first(); 
         $questioncollection = array();
-        array_push($questioncollection, $getquestion1, $getquestion2);
+        array_push($questioncollection, $getquestion1);
         $model = new UserModel();
         $multiClause5 = array('id' => $userid,'tenant_id' => $tenantid); 
         $user = $model->where($multiClause5)->first();
@@ -287,10 +325,10 @@ class EmailTemplateController extends BaseController
   
         if ($this->request->getMethod() == 'post') {
             $rules = [
-                'RESULT_TextField0' => 'required',
+                'RESULT_TextField' => 'required',
             ];
             $errors = [
-                'RESULT_TextField0' => [
+                'RESULT_TextField' => [
                     'required' => 'You must choose a first question.',
                 ]
             ];
@@ -307,7 +345,7 @@ class EmailTemplateController extends BaseController
                 ]);
             } else {
                 $answer = array();
-                array_push($answer, $this->request->getPost("RESULT_TextField0"), $this->request->getPost("RESULT_TextField1"));
+                array_push($answer, $this->request->getPost("RESULT_TextField"), $this->request->getPost("RESULT_TextField1"));
 
                     $data = [
                         "campign_id" => $this->request->getPost("surveyid"),
@@ -345,5 +383,16 @@ class EmailTemplateController extends BaseController
         $new_db_insert_user ="INSERT INTO ".$dbname.".nps_survey_response ( ". implode(',' , $key) .") VALUES('". implode("','" , $values) ."')";
         $db->query($new_db_insert_user);
         $db->close(); 
+    }
+    public function getquestionnext(){
+        $output="Ajax request Success.";
+        if ($this->request->isAJAX()) {
+            $query = service('request')->getPost();
+            $userId = $query['id'];
+            $model = new QuestionModel();
+            $multiClause3 = array('user_id' => $userId, "info_details" => 'other'); 
+            $getquestion1 = $model->where($multiClause3)->findall(); 
+            echo json_encode(['success'=> $output, 'csrf' => csrf_hash(), 'query' => $getquestion1]);
+        }
     }
 }

@@ -2,12 +2,12 @@
 
 <?= $this->section("body") ?>
 
-    <?php include APPPATH.'views/layouts/sidebar.php';?>
+    <?php include APPPATH.'Views/layouts/sidebar.php';?>
 
     <section class="home">
         <div class="container">
             <!-- Breadcrumbs-->
-          <?php include APPPATH.'views/layouts/breadcrumb.php';?>       
+          <?php include APPPATH.'Views/layouts/breadcrumb.php';?>       
           <!-- Icon Cards-->
           <div class="row">
             <div class="col-xl-12 col-sm-6 mb-3">

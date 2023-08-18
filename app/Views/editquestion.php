@@ -1,11 +1,11 @@
 <?= $this->extend("layouts/app") ?>
 
 <?= $this->section("body") ?>
-<?php include APPPATH.'views/layouts/sidebar.php';?>
+<?php include APPPATH.'Views/layouts/sidebar.php';?>
 <?php echo script_tag('js/jquery.min.js'); ?>
 <section class="home">
         <div class="container">        <!-- Breadcrumbs-->
-    <?php include APPPATH.'views/layouts/breadcrumb.php';?>  
+    <?php include APPPATH.'Views/layouts/breadcrumb.php';?>  
     <!-- Page Content -->
     <h1>Create Question and Summary</h1>
     <hr>    
@@ -17,7 +17,7 @@
   $question_name = $getQuestData['question_name'];
   $description = $getQuestData['description'];
   $info_details = $getQuestData['info_details'];
-
+  $other_option = $getQuestData['other_option'] ? json_decode($getQuestData['other_option']): '';
    ?>
     <form class="form-horizontal" action="<?= base_url('editquestion/'.$question_id) ?>" method="post">
     <div id="dynamic_field">
@@ -48,8 +48,10 @@
       <div class="col-xl-6 col-lg-6 col-md-6">
   <div class="form-group">
     <div class="input-group">         
-        <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="amswer" value="<?php echo $info_details; ?>">
-            <option value="nps">NPS Answer Type</option>
+        <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="amswer" value="<?php echo $info_details; ?>"  id="answer_data">
+        <option value="">-select-</option>
+            <option value="nps" <?php if($info_details == "nps"){  ?> selected="selected" <?php } ?> >NPS Answer Type</option>
+            <option value="other" <?php if($info_details == "other"){  ?> selected="selected" <?php } ?> >Other</option>
         </select>
 
         </div>        </div>
@@ -57,6 +59,25 @@
         </div>   
       </div>
     </div>
+    <?php if(!empty($other_option)) { ?>
+    <div class="form-group  mb-3" id="answerother_open">
+        <div class="form-row row">
+      <label class="control-label col-xl-3 col-lg-3 col-md-3" for="Answer">Other Answer:</label>
+      <div class="col-xl-6 col-lg-6 col-md-6">
+  <div class="form-group">
+    <div class="input-group">         
+        <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="amswerdata[]" id="answerother" multiple>
+        <?php foreach($answercollection as $key => $answerlist) { ?> 
+            <option value="<?php echo $answerlist; ?>" <?php if(in_array( $answerlist, $other_option)) {?> selected="selected" <?php } ?>><?php echo $answerlist; ?></option>
+          <?php  } ?>
+        </select>
+
+        </div>
+        </div>   
+      </div>
+    </div>
+    </div>  
+    <?php } ?>
 
      
     <div class="form-group  mt-3">          
@@ -69,8 +90,26 @@
 
     </div>
         </section>
-<!-- 
-<script type="text/javascript">
+        <script type="text/javascript">
+$(document).ready(function(){      
+  $("#answerother_open").hide();
+  var otheroption = "<?php echo $info_details; ?>";
+  if(otheroption == 'other'){
+    $("#answerother_open").show();
+  }else {
+    $("#answerother_open").hide();
+
+  }
+  $('#answer_data').change(function(){  
+        if($(this).val() == 'other') {
+          $("#answerother_open").show();
+        }else {
+          $("#answerother_open").hide();
+        }
+    });
+});
+</script> 
+<!-- <script type="text/javascript">
     $(document).ready(function(){      
       var i=1;  
       $('#add').click(function(){  
@@ -92,5 +131,5 @@
       }
   
     });  
-</script> -->
+</script>  -->
 <?= $this->endSection() ?>

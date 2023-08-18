@@ -3,12 +3,12 @@
 <?= $this->section("body") ?>
 
 <div id="wrapper">
-    <?php include APPPATH.'views/layouts/sidebar.php';?>
+    <?php include APPPATH.'Views/layouts/sidebar.php';?>
 
     <div id="content-wrapper">
         <div class="container-fluid">
             <!-- Breadcrumbs-->
-            <?php include APPPATH.'views/layouts/breadcrumb.php';?>       
+            <?php include APPPATH.'Views/layouts/breadcrumb.php';?>       
 
           
 

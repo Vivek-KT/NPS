@@ -40,11 +40,11 @@ class Userrules
         if (!$user) {
             return false;
         }
-        print_r(password_verify($data['password'], $user['password']));
         if(password_verify($data['password'], $user['password'])) {
             return false;
         }else {
             return true;
         }
     }
+    
 }

@@ -51,56 +51,54 @@ $routes->group("user", ["filter" => "auth"], function ($routes) {
 });
 $routes->get('signup', 'UserController::signup');
 
-$routes->get('userprofile', 'UserController::getprofile');
-
-$routes->get('changepassword', 'UserController::changepassword');
-
-$routes->get('userpermission', 'TenantController::getUserDetails');
-
-$routes->get('createtenant', 'TenantController::index');
-
-$routes->get('Migrate', 'Migrate::index');
-
-$routes->get('/ajax-request', 'AdminController::ajaxrequest');
-$routes->match(['get', 'post'], 'changerole', 'AdminController::updateRole', ["filter" => "auth"]);
-
-
-$routes->get('validatepage/(:num)', 'UserController::validatepage/$1');
-$routes->get('validateoption/(:num)', 'UserController::validateoption/$1');
-
+$routes->get('userprofile', 'UserController::getprofile', ["filter" => "auth"]);
+$routes->get('changepassword', 'UserController::changepassword', ["filter" => "auth"]);
+$routes->get('userpermission', 'TenantController::getUserDetails', ["filter" => "auth"]);
+$routes->get('createtenant', 'TenantController::index', ["filter" => "auth"]);
 $routes->get('createquestion', 'QandAController::index', ["filter" => "auth"]);
 $routes->get('questionList', 'QandAController::questionList', ["filter" => "auth"]);
 $routes->get('editquestion/(:num)', 'QandAController::editquestion/$1', ["filter" => "auth"]);
 $routes->get('deletequestion/(:num)', 'QandAController::deletequestion/$1', ["filter" => "auth"]);
-$routes->match(['get', 'post'], 'editquestion/(:num)', 'QandAController::editquestion/$1', ["filter" => "auth"]);
-$routes->match(['get', 'post'], 'deletequestion/(:num)', 'QandAController::deletequestion/$1', ["filter" => "auth"]);
-
 $routes->get('createSurvey', 'SurveyController::index', ["filter" => "auth"]);
 $routes->get('surveyList', 'SurveyController::surveyList', ["filter" => "auth"]);
 $routes->get('editsurvey/(:num)', 'SurveyController::editsurvey/$1', ["filter" => "auth"]);
 $routes->get('deletesurvey/(:num)', 'SurveyController::deletesurvey/$1', ["filter" => "auth"]);
+$routes->get('emailtemplate', 'EmailTemplateController::index', ["filter" => "auth"]);
+$routes->get('SurveyResponse', 'SurveyResponseController::index', ["filter" => "auth"]);
+$routes->get('getCustomerData', 'SurveyResponseController::getCustomerList', ["filter" => "auth"]);
+$routes->get('settingpage', 'TenantController::settingpage', ["filter" => "auth"]);
+
+
 $routes->match(['get', 'post'], 'editsurvey/(:num)', 'SurveyController::editsurvey/$1', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'changerole', 'AdminController::updateRole', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'editquestion/(:num)', 'QandAController::editquestion/$1', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'deletequestion/(:num)', 'QandAController::deletequestion/$1', ["filter" => "auth"]);
 $routes->match(['get', 'post'], 'deletesurvey/(:num)', 'SurveyController::deletesurvey/$1', ["filter" => "auth"]);
 $routes->match(['get', 'post'], 'create_survey', 'SurveyController::createSurvey', ["filter" => "auth"]);
-
-
-$routes->match(['get', 'post'], 'create_question', 'QandAController::createQuestion', ["filter" => "auth"]);
-
-$routes->get('emailtemplate', 'EmailTemplateController::index', ["filter" => "auth"]);
 $routes->match(['get', 'post'], 'uploadFile', 'EmailTemplateController::uploadFile', ["filter" => "auth"]);
 $routes->match(['get', 'post'], 'sendEmail', 'EmailTemplateController::sendEmail', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'create_question', 'QandAController::createQuestion', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'createsurveyanswer', 'EmailTemplateController::createsurveyanswer');
+$routes->match(['get', 'post'], 'SurveyResponse', 'SurveyResponseController::index', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'getquestionnext', 'EmailTemplateController::getquestionnext');
+$routes->match(['get', 'post'], 'settingupdate', 'TenantController::settingupdate', ["filter" => "auth"]);
+$routes->match(['get', 'post'], 'logoupload', 'TenantController::logoupload', ["filter" => "auth"]);
 
+
+$routes->get('Migrate', 'Migrate::index');
+
+$routes->get('/ajax-request', 'AdminController::ajaxrequest');
+
+
+$routes->get('validatepage/(:num)', 'UserController::validatepage/$1');
+$routes->get('activateOption/(:num)', 'UserController::activateOption/$1');
 $routes->get('logout', 'UserController::logout');
-
 $routes->get('forget', 'UserController::forget');
 $routes->match(['get', 'post'], 'getSurveyAnwser/(:any)/(:any)/(:any)/(:any)', 'EmailTemplateController::getSurveyAnwser/$1/$2/$3/$4');
-
 $routes->get('getSurveyAnwser/(:any)/(:any)/(:any)/(:any)', 'EmailTemplateController::getSurveyAnwser/$1/$2/$3/$4');
-$routes->match(['get', 'post'], 'createsurveyanswer', 'EmailTemplateController::createsurveyanswer');
 
-$routes->match(['get', 'post'], 'SurveyResponse', 'SurveyResponseController::index', ["filter" => "auth"]);
-
-$routes->get('SurveyResponse', 'SurveyResponseController::index', ["filter" => "auth"]);
+$routes->get('resetpwd', 'UserController::resetpwd');
+$routes->match(['get', 'post'], 'resetpwd', 'UserController::resetpwd');
 
 
 
