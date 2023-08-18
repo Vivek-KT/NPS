@@ -1,12 +1,12 @@
 <?= $this->extend("layouts/app") ?>
 
 <?= $this->section("body") ?>
-<?php include APPPATH.'views/layouts/sidebar.php';?>
+<?php include APPPATH.'Views/layouts/sidebar.php';?>
 <section class="home">
         <div class="container">
 
         <!-- Breadcrumbs-->
-    <?php include APPPATH.'views/layouts/breadcrumb.php';?>  
+    <?php include APPPATH.'Views/layouts/breadcrumb.php';?>  
     <!-- Page Content -->
     <h1>User permission List</h1>
     <hr>

@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\TenantModel;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 
 class UserController extends BaseController
@@ -64,6 +66,7 @@ class UserController extends BaseController
             'firstname' => $user['firstname'],
             'lastname' => $user['lastname'],
             'username' => $user['username'],
+            'logo_update' => $user['logo_update'],
             'status' => $user['status'],
             'phone_no' => $user['phone_no'],
             'email' => $user['email'],
@@ -121,8 +124,9 @@ class UserController extends BaseController
                 if($tenant['tenant_id'] > 1) {
                     $this->tenantInsertUser($this->request->getPost(),$tenant,$userId);
                 }
-                session()->setFlashdata('response',"New User Created");
-                return redirect()->to(base_url('validatepage/'.$userId));
+                $emailstatus = $this->createTemplateForMailReg($this->request->getPost(), $userId );
+                session()->setFlashdata('response',$emailstatus);
+                return redirect()->to(base_url('login'));
 
             }
         }
@@ -137,7 +141,7 @@ class UserController extends BaseController
             "tenant_id" => $tenantdata['tenant_id'],
             "email" =>  $postdata['email'],
             "phone_no" =>  $postdata['phone_no'],
-            "role" => "user",
+            "role" => "admin",
             "password" => password_hash($postdata['password'], PASSWORD_DEFAULT),
             "status" => "0"
         ];
@@ -240,7 +244,15 @@ class UserController extends BaseController
     }
 
     public function tenantUserPasswordUpdate($data, $tenantId, $updateId) {
-        $dbname = "nps_".session()->get('tenant_name');
+        if(empty(session()->get('tenant_name'))) { 
+            $model = new TenantModel();
+            $tenant = $model->where('tenant_id',$tenantId)->first();
+            $ses_ten_id = $tenant['tenant_name'];
+        }else{
+            $ses_ten_id = session()->get('tenant_name');
+        }
+        
+        $dbname = "nps_".$ses_ten_id;
         //new DB updation for Tenant details
         $db = db_connect();
         $db->query('USE '.$dbname);
@@ -253,7 +265,7 @@ class UserController extends BaseController
         return view('validatepage', ["userId" => $id]);
     }
 
-    public function validateoption($id){
+    public function activateOption($id){
         $model = new UserModel();    
         $usersvalidate = $model->where('id', $id)->first();
         $updateId = $usersvalidate['id'];
@@ -292,21 +304,95 @@ class UserController extends BaseController
                     ]);
                 }
                 $updateId = $userData["id"];
-                $newpassword = "123456";
+                $newpassword = $this->randomPassword();
                 $tenantId = $userData["tenant_id"];
-                $data = [
-                    "password" => password_hash($newpassword, PASSWORD_DEFAULT),
-                ];  
-                $model = new UserModel();
-                $model->update($updateId,$data);
-                if($tenantId > 1){
-                    $this->tenantUserForget($data,$tenantId,$updateId);
-                }
-                session()->setFlashdata('response',"Password Updated Successfully");
+                // $data = [
+                //     "password" => password_hash($newpassword, PASSWORD_DEFAULT),
+                // ];  
+                // $model = new UserModel();
+                // $model->update($updateId,$data);
+                // if($tenantId > 1){
+                //     $this->tenantUserForget($data,$tenantId,$updateId);
+                // }
+                $emailstatus = $this->createTemplateForMail($this->request->getPost(), $newpassword, $userData );
+                session()->setFlashdata('response',$emailstatus);
                 return redirect()->to(base_url('forget'));
             }
         }
         return view("forgetpassword");
+    }
+    public function randomPassword() {
+        $alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789!@#$%&*";
+        $pass = array(); //remember to declare $pass as an array
+        $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
+        for ($i = 0; $i < 8; $i++) {
+            $n = rand(0, $alphaLength);
+            $pass[] = $alphabet[$n];
+        }
+        return implode($pass); //turn the array into a string
+    }
+    public function createTemplateForMail($postdata, $newpassword, $userData){
+
+        $mail = new PHPMailer(true); 
+        $template = view("template/email-template", ["password" => $newpassword, "userdata" => $userData, "postData" => $postdata]); 
+		try {
+		    
+		    $mail->isSMTP();  
+		    $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
+		    $mail->SMTPAuth     = true;     
+		    $mail->Username     = 'hctoolssmtp@gmail.com';  
+		    $mail->Password     = 'iyelinyqlqdsmhro';
+			$mail->SMTPSecure   = 'tls';  
+			$mail->Port         = 587;  
+			$mail->Subject      = "Sample Subject from CI";
+			$mail->Body         = $template;
+            
+			$mail->setFrom('hctoolssmtp@gmail.com', 'CI-NPS');
+			
+			$mail->addAddress($postdata["email"]);  
+			$mail->isHTML(true);      
+			
+			if(!$mail->send()) {
+			    return "Something went wrong. Please try again.". $mail->ErrorInfo;
+			}
+		    else {
+			    return "Activate link has been send to your email";
+		    }
+		    
+		} catch (Exception $e) {
+		    return "Something went wrong. Please try again.". $mail->ErrorInfo;
+		}
+    }
+    public function createTemplateForMailReg($postdata, $userId){
+        $mail = new PHPMailer(true); 
+        $template = view("template/email-template-reg", ["postdata" => $postdata, "userId" => $userId]); 
+		try {
+		    
+		    $mail->isSMTP();  
+		    $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
+		    $mail->SMTPAuth     = true;     
+		    $mail->Username     = 'hctoolssmtp@gmail.com';  
+		    $mail->Password     = 'iyelinyqlqdsmhro';
+			$mail->SMTPSecure   = 'tls';  
+			$mail->Port         = 587;  
+			$mail->Subject      = "Sample Subject from CI";
+			$mail->Body         = $template;
+            
+			$mail->setFrom('hctoolssmtp@gmail.com', 'CI-NPS');
+			
+			$mail->addAddress($postdata["email"]);  
+			$mail->isHTML(true);      
+			
+			if(!$mail->send()) {
+			    return "Something went wrong. Please try again.". $mail->ErrorInfo;
+			}
+		    else {
+			    return "A New Account has created.";
+		    }
+		    
+		} catch (Exception $e) {
+		    return "Something went wrong. Please try again.". $mail->ErrorInfo;
+		}
     }
     public function tenantUserForget($data, $tenantId, $updateId) {
         $model = new TenantModel();
@@ -331,5 +417,42 @@ class UserController extends BaseController
         $values = array_values($data); 
         $new_db_update_user ="UPDATE  ".$dbname.".`nps_users` SET `status` = 1, updated_at =now() WHERE `nps_users`.`id` = ".$updateId;
         $db->query($new_db_update_user);
+    }
+    public function resetpwd(){
+        $userId = $this->request->getGet('id');
+        $model = new UserModel();
+        $userData = $model->where('id', $userId)->first();
+
+        if ($this->request->getMethod() == 'post') {
+             $rules = [
+                'password' => 'required|min_length[4]|max_length[255]',
+                'confirmpassword' => 'required|min_length[4]|max_length[255]|matches[password]',
+            ];
+            $errors = [
+                'password' => [
+                    'passwordchecker' => "Current password is not same as old password",
+                ],
+            ];
+            if (!$this->validate($rules, $errors)) {
+                return view('resetpassword', [
+                    "validation" => $this->validator
+                ]);
+            } else {
+                $data = [
+                    "password" => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT),
+                ];
+         
+                $updateId = $this->request->getPost('userId');
+                $tenantId = $this->request->getPost('tenant_id');
+                $model = new UserModel();
+                $model->update($updateId,$data);
+                if($tenantId > 1){
+                    $this->tenantUserPasswordUpdate($data,$tenantId,$updateId);
+                }
+                session()->setFlashdata('response',"Password Updated Successfully");
+                return redirect()->to(base_url('login'));
+            }
+        }
+        return view('resetpassword', ["userdata" => $userData]);
     }
 }

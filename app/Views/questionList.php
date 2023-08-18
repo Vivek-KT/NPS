@@ -1,13 +1,13 @@
 <?= $this->extend("layouts/app") ?>
 
 <?= $this->section("body") ?>
-<?php include APPPATH.'views/layouts/sidebar.php';?>
+<?php include APPPATH.'Views/layouts/sidebar.php';?>
 <?php echo script_tag('js/jquery.min.js'); ?>
 <section class="home">
         <div class="container">        <!-- Breadcrumbs-->
 
         <!-- Breadcrumbs-->
-    <?php include APPPATH.'views/layouts/breadcrumb.php';?>  
+    <?php include APPPATH.'Views/layouts/breadcrumb.php';?>  
     <!-- Page Content -->
     <h1>Question List</h1>
     <hr>    

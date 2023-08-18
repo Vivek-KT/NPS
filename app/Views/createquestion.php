@@ -1,12 +1,12 @@
 <?= $this->extend("layouts/app") ?>
 
 <?= $this->section("body") ?>
-<?php include APPPATH.'views/layouts/sidebar.php';?>
+<?php include APPPATH.'Views/layouts/sidebar.php';?>
 <?php echo script_tag('js/jquery.min.js'); ?>
 <section class="home">
         <div class="container">
         <!-- Breadcrumbs-->
-    <?php include APPPATH.'views/layouts/breadcrumb.php';?>  
+    <?php include APPPATH.'Views/layouts/breadcrumb.php';?>  
     <!-- Page Content -->
     <h1>Create Question and Summary</h1>
     <hr>    
@@ -41,16 +41,34 @@
       <div class="col-xl-6 col-lg-6 col-md-6">
   <div class="form-group">
     <div class="input-group">         
-        <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="amswer" >
+        <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="amswer" id="answer_data" >
+            <option value="">-select-</option>
             <option value="nps">NPS Answer Type</option>
+            <option value="other">Other</option>
         </select>
 
         </div>
         </div>   
       </div>
     </div>
+    </div>
+    <div class="form-group  mb-3" id="answerother_open">
+        <div class="form-row row">
+      <label class="control-label col-xl-3 col-lg-3 col-md-3" for="Answer">Other Answer:</label>
+      <div class="col-xl-6 col-lg-6 col-md-6">
+  <div class="form-group">
+    <div class="input-group">         
+        <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="amswerdata[]" id="answerother" multiple>
+        <?php foreach($answercollection as $key => $answerlist) { ?> 
+            <option value="<?php echo $answerlist; ?>"><?php echo $answerlist; ?></option>
+          <?php  } ?>
+        </select>
 
-     
+        </div>
+        </div>   
+      </div>
+    </div>
+    </div>     
     <div class="form-group  mt-3">          
       <div class="form-row row">
       <div class="col-md-6 offset-4">
@@ -61,6 +79,18 @@
 
     </div>
         </section>
+        <script type="text/javascript">
+$(document).ready(function(){      
+  $("#answerother_open").hide();
+  $('#answer_data').change(function(){  
+        if($(this).val() == 'other') {
+          $("#answerother_open").show();
+        }else {
+          $("#answerother_open").hide();
+        }
+    });
+});
+</script> 
 <!-- 
 <script type="text/javascript">
     $(document).ready(function(){      

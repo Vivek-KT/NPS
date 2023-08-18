@@ -189,6 +189,7 @@ class TenantController extends BaseController
             `question_name` text NOT NULL,
             `description` text NOT NULL,
             `info_details` varchar(120) NOT NULL,
+            `other_option` text NOT NULL,
             `user_id` int(11) NOT NULL,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp()
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
@@ -211,9 +212,9 @@ class TenantController extends BaseController
             `user_id` int(11) NOT NULL,
             `email` varchar(120) NOT NULL,
             `question_id` int(11) NOT NULL,
-            `answer_id` int(11) NOT NULL,
+            `answer_id` varchar(55) NOT NULL,
             `question_id2` int(11) NOT NULL,
-            `answer_id2` int(11) NOT NULL,
+            `answer_id2` varchar(55) NOT NULL,
             `ip_details` varchar(120) NOT NULL,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp()
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";
@@ -229,6 +230,7 @@ class TenantController extends BaseController
             `phone_no` varchar(120) NOT NULL,
             `role` enum('admin','user') NOT NULL,
             `password` varchar(240) NOT NULL,
+            `logo_update` text NOT NULL,
             `status` enum('1','0') NOT NULL,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
             `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -242,5 +244,112 @@ class TenantController extends BaseController
         $users = $model->where('tenant_id', session()->get('tenant_id'))->find();
         
         return view('userpermission', ["users" => $users]);
+    }
+    public function settingpage(){
+        $model = new UserModel();
+        $userdata = $model->where('email', session()->get('email'))->first();
+        // echo "<pre>";print_r($userdata); print_r($userdata['logo_update']);exit;
+        $settingData = [
+            "u_id" => $userdata['id'],
+            "firstname" => $userdata['firstname'],
+            "lastname" => $userdata['lastname'],
+            "username" => $userdata['username'],
+            "logo_img" => $userdata['logo_update'] ? $userdata['logo_update']: 'images/no_image.jpg',
+            "logo_update" => $userdata['logo_update'],
+            "email" => $userdata['email'],
+        ];
+        return view('admin/settingpage', ["settingdata" => $settingData]);
+    }
+    public function logoupload(){
+        $input = $this->validate([
+            'formData' => 'uploaded[formData]|max_size[formData,2048]|ext_in[formData,jpg,jpeg,png]'
+        ]);
+        if (!$input) {
+            $data['validation'] = $this->validator;
+            $response = ['failed'=> $data, 'csrf' => csrf_hash() ];
+            return $this->response->setJSON($response);
+        }else {
+            if($file = $this->request->getFile('formData')) {
+                if ($file->isValid() && ! $file->hasMoved()) {
+                    $newName =session()->get('username')."_".rand()."_".$file->getName();
+                    $filepath = 'uploads/' . $newName;
+                    $file->move('uploads', $newName);
+                    $data = [
+                        'img_name' => $file->getClientName(),
+                        'file'  => $file->getClientMimeType(),
+                        'filepath'  => $filepath
+                    ];
+                    $response = [
+                        'success' => true,
+                        'data' => $data,
+                        'msg' => "Image successfully uploaded"
+                    ];                   
+                }                                        
+            }
+            return $this->response->setJSON($response);  
+        }
+    }
+    public function settingupdate(){
+        $data = [];
+        if ($this->request->getMethod() == 'post') {
+            $rules = [
+                'firstname' => 'required|alpha',
+                'lastname' => 'required|alpha',
+                'username' => 'required|min_length[6]|max_length[50]',
+                ];
+                $errors = [
+                    'username' => [
+                        'required' => 'You must choose a username.',
+                    ],
+                ];
+                if (!$this->validate($rules, $errors)) {
+                    return view('admin/settingpage', [
+                        "validation" => $this->validator,
+                    ]);
+                } else {
+                    $updateId = session()->get('id');
+                    $tenantId = session()->get('tenant_id');
+                    $this->updateSetting($this->request->getPost(), $updateId);
+                    if($tenantId > 1){
+                        $this->tenantUserPasswordUpdate($this->request->getPost(),$tenantId,$updateId);
+                    }
+                }
+        
+            session()->setFlashdata('response',"Data updated Successfully");
+            return redirect()->to(base_url('settingpage'));
+        }
+    }
+    public function updateSetting($postdata, $updateId) {
+        $data = [
+            "firstname" => $postdata['firstname'],
+            "lastname" => $postdata['lastname'],
+            "username" => $postdata['username'],
+            "logo_update" => $postdata['logofile']
+        ];
+        $model = new UserModel();
+        $model->update($updateId,$data);
+        $dataSession = [
+            'logo_update' => $postdata['logofile'],
+        ];
+        session()->setFlashdata('logo_update',$postdata['logofile']);
+        session()->set($dataSession);
+    }
+    public function tenantUserPasswordUpdate($postdata, $updateId) {
+        $data = [
+            "firstname" => $postdata['firstname'],
+            "lastname" => $postdata['lastname'],
+            "username" => $postdata['username'],
+            "logo_update" => $postdata['logofile']
+        ];
+        $dbname = "nps_".session()->get('tenant_name');
+        //new DB updation for Tenant details
+        $db = db_connect();
+        $db->query('USE '.$dbname);
+        $cols = array();
+        foreach($data as $key=>$val) {
+            $cols[] = "$key = '$val'";
+        }
+        $new_db_update_user ="UPDATE  ".$dbname.".`nps_users` SET " . implode(', ', $cols) . " WHERE `nps_users`.`id` = ".$updateId;
+        $db->query($new_db_update_user);
     }
 }

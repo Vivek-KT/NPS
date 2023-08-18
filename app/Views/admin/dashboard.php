@@ -1,14 +1,14 @@
 <?= $this->extend("layouts/app") ?>
 <?= $this->section("body") ?>
-<?php include APPPATH.'views/layouts/sidebar.php';?>
+<?php include APPPATH.'Views/layouts/sidebar.php';?>
 <?php echo script_tag('js/jquery.min.js'); ?>
 <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
-<link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
-
+<link rel="stylesheet" type="text/css" href="<?= base_url('css/daterangepicker.css') ?>" />
     <section class="home">
         <div class="container">
             <div class="row">
+
             <?php if(session()->get('tenant_id') == 1) { ?> 
             <div class="col-xl-8 col-lg-8 col-md-8"></div>
             <div class="col-xl-4 col-lg-4 col-md-4 float-right">
@@ -21,8 +21,11 @@
             <?php } ?>
             </div>
             <div class="row mt-3">
-                <div class="col-xl-8 col-lg-8 col-md-8">
+                <div class="col-xl-4 col-lg-4 col-md-4">
                     <h1>Dashboard - Live</h1>
+                </div>
+                <div class="col-xl-4 col-lg-4 col-md-4">
+                
                 </div>
                 <div class="col-xl-4 col-lg-4 col-md-4">
                     <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
@@ -147,11 +150,18 @@
             </div>
         </div>
     </section>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.bundle.min.js'></script>
+    
+    <script  src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.bundle.min.js'></script>
     <script type="text/javascript">
     $(function() {
-        var start = moment().subtract(32, 'days');
+        var currentdate = "<?php echo $getdashData['selectRange']; ?>";
+        var start =  moment().subtract(32, 'days');
         var end = moment();
+        if(currentdate){
+            var splitdate = currentdate.split("_");
+            var start =  moment(new Date(splitdate[0]));
+            var end =  moment(new Date(splitdate[1]));
+        }        
         function cb(start, end) {
             $('#reportrange span').html(start.format('DD-MMMM-YYYY') + ' - ' + end.format('DD-MMMM-YYYY'));
         }
@@ -372,7 +382,7 @@
                 },
                 elements: {
                     center: {
-                        text: responserate,
+                        text: totalDet,
                         text2: totalDet,
                         state: 'increase',
                         color: '#00FF80', // Default is #000000

@@ -1,15 +1,27 @@
 <?= $this->extend("layouts/app") ?>
 
 <?= $this->section("body") ?>
-<?php include APPPATH.'views/layouts/sidebar.php';?>
+<?php include APPPATH.'Views/layouts/sidebar.php';?>
 <?php echo script_tag('js/jquery.min.js'); ?>
 
 <section class="home">
         <div class="container">
         <!-- Breadcrumbs-->
-    <?php include APPPATH.'views/layouts/breadcrumb.php';?> 
-    <h1>Survey Response</h1>
-    <hr>  
+    <?php include APPPATH.'Views/layouts/breadcrumb.php';?>
+    <div class="row"> 
+    <div class="col-xl-8 col-lg-8 col-md-8"><h1>Survey Response</h1> </div>
+            <?php if(session()->get('tenant_id') == 1) { ?> 
+            <div class="col-xl-4 col-lg-4 col-md-4 float-right">
+                <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="tenant" id="tenantchange">
+                <?php foreach($getTenantdata as $getTenantlist) { ?> 
+                    <option value="<?php echo $getTenantlist['tenant_id'] ; ?>" <?php if($selectTenant ==  $getTenantlist['tenant_id']): ?>selected="selected" <?php endif; ?>><?php echo $getTenantlist['tenant_name'] ; ?></option>
+                  <?php  } ?>
+                  </select>
+            </div>
+            <?php } ?>
+            </div>
+            <hr>  
+
     <form class="form-horizontal" action="<?= base_url('SurveyResponse') ?>" method="post">
 
     <div class="row mb-4">
@@ -65,4 +77,23 @@
     </form>
     </div>
   </section>
+  <script type="text/javascript">
+        $("#tenantchange").change(function(){
+        var t_id= $(this).val();
+        var newUrl = '';
+        var currLoc = $(location).attr('href');
+        var hashes =  window.location.href.indexOf("?");    
+        if(hashes == -1) {
+            var currentUrl = window.location.href +"?tenantId="+t_id;
+            var urls = new URL(currentUrl);
+            newUrl = urls.href; 
+        }else {
+            var currentUrl = window.location.href;
+            var urls = new URL(currentUrl);
+            urls.searchParams.set("tenantId", t_id); // setting your param
+            newUrl = urls.href; 
+        }
+        window.location.href =  newUrl;
+    });
+    </script>
     <?= $this->endSection() ?>
