@@ -341,7 +341,7 @@ class UserController extends BaseController
 		    $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
 		    $mail->SMTPAuth     = true;     
 		    $mail->Username     = 'hctoolssmtp@gmail.com';  
-		    $mail->Password     = 'iyelinyqlqdsmhro';
+		    $mail->Password     = '*****';
 			$mail->SMTPSecure   = 'tls';  
 			$mail->Port         = 587;  
 			$mail->Subject      = "Sample Subject from CI";
@@ -372,7 +372,7 @@ class UserController extends BaseController
 		    $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
 		    $mail->SMTPAuth     = true;     
 		    $mail->Username     = 'hctoolssmtp@gmail.com';  
-		    $mail->Password     = 'iyelinyqlqdsmhro';
+		    $mail->Password     = '*****';
 			$mail->SMTPSecure   = 'tls';  
 			$mail->Port         = 587;  
 			$mail->Subject      = "Sample Subject from CI";
