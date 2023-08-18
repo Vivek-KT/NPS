@@ -184,7 +184,7 @@ class EmailTemplateController extends BaseController
             $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
             $mail->SMTPAuth     = true;     
             $mail->Username     = 'hctoolssmtp@gmail.com';  
-            $mail->Password     = 'iyelinyqlqdsmhro';
+            $mail->Password     = '*******';
             $mail->SMTPSecure   = 'tls';  
             $mail->Port         = 587;  
             $mail->Subject      = $postdata['subject'] ? $postdata['subject']  :"What did you think about NPS";
