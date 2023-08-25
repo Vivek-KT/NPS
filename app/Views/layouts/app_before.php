@@ -1,25 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>NPS- Admin Panel</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="<?= base_url('vendor/bootstrap/css/bootstrap.css') ?>">
-  <link rel="stylesheet" href="<?= base_url('vendor/fontawesome-free/css/all.css') ?>">
-  <link rel="stylesheet" href="<?= base_url('css/sb-admin.css') ?>">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="<?= base_url('css/front/bootstrap.min.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/front/nps.css') ?>">
+    <link rel="stylesheet" href="<?= base_url('css/front/Mediaquery.css') ?>">
 
+    <title>NPS Login page</title>
 </head>
-<body class="">
-
+<body>
+<div class="container">
+        <nav class="navbar container">
+            <div class="container">
+              <a class="navbar-brand" href="#">
+                <img src="<?php echo base_url(); ?>images/logo.png" class="logo img-fluid" alt="logo">
+              </a>
+            </div>
+          </nav>
    <?= $this->renderSection("body") ?>
-
+   </div> 
+          <div class="row">
+        <img src="<?php echo base_url(); ?>images/Vectors.png" class="Footer-img img-fluid" alt="login-image">
+    </div>
 </body>
 
 <?php echo script_tag('vendor/jquery/jquery.min.js'); ?>
 <?php echo script_tag('vendor/bootstrap/js/bootstrap.bundle.min.js'); ?>
 <?php echo script_tag('vendor/jquery-easing/jquery.easing.min.js'); ?>
-<?php echo script_tag('js/sb-admin.js'); ?>
-<?php echo script_tag('vendor/chart.js/Chart.min.js'); ?>
 
 
 </html>

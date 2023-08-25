@@ -21,13 +21,17 @@ class AdminController extends BaseController
     }
     public function index()
     {
-        $tenantId = session()->get('tenant_id');
+        $tenantId = ($this->request->getGet("tenantId") != '') ? $this->request->getGet("tenantId") :  session()->get('tenant_id');
         $userId = array();
         $model = new TenantModel();  
         $getTenantdata = $model->findall(); 
         // Filter concept
         $selectTenant = '';
         $selectRange = '';
+        $selectfilter = '';
+        $detractorsArray1  = array();
+        $passivesArray1   = array();
+        $promotersArray1  = array();        
         if($this->request->getGet("tenantId") == '1' || $this->request->getGet("tenantId") == '' ) {
             $model = new UserModel();
             $userlist = $model->where('tenant_id', session()->get('tenant_id'))->findall();
@@ -36,25 +40,66 @@ class AdminController extends BaseController
             $userlist = $model->where('tenant_id', $this->request->getGet("tenantId"))->findall();
             $selectTenant = $this->request->getGet("tenantId");
         }
+        foreach($userlist as $userarray){
+            array_push($userId, $userarray['id']);
+        }
         $daterange = '';
+        $comparestartdate = '';
+        $compareenddate = '';     
+        $datacompare = array(); 
         if($this->request->getGet("daterange") != '' ) {
             $daterange = explode("_" , $this->request->getGet("daterange"));
             $returnDate1 = date("d-F-Y", strtotime($daterange[0]));
             $returnDate2 = date("d-F-Y", strtotime($daterange[1]));
             $returnDate = $returnDate1."_".$returnDate2;
             $selectRange = $returnDate;
+            $daysdiffer = intval(abs((strtotime($daterange[0]) - strtotime($daterange[1]))/86400));
+            $comparestartdate = date("Y-m-d", strtotime($daterange[0]."-".$daysdiffer." days"));
+            $compareenddate = date("Y-m-d", strtotime($daterange[1]."-".$daysdiffer." days"));            
         }
-        foreach($userlist as $userarray){
-            array_push($userId, $userarray['id']);
+        if($this->request->getGet("filter")  == "yes"){
+            $c_promotersArray1=  array();   
+            $c_passivesArray1=  array();   
+            $c_detractorsArray1= array();   
+            $selectfilter = $this->request->getGet("filter");
+            $model = new AnswercreateModel();
+            if(is_array($daterange)){
+                $model->where("CAST(created_at AS DATE) BETWEEN '$comparestartdate' AND '$compareenddate'");
+            }
+            $getSurveyDatacompare = $model->whereIn('user_id', $userId)->findall();  
+            foreach($getSurveyDatacompare as $key => $getSurveylist) {
+                if($getSurveylist['answer_id'] > 8) {
+                    array_push($promotersArray1, $getSurveylist['answer_id']);
+                    array_push($c_promotersArray1, $getSurveylist['answer_id']);
+                }            
+                if($getSurveylist['answer_id'] <= 8 && $getSurveylist['answer_id'] > 6) {
+                    array_push($passivesArray1, $getSurveylist['answer_id']);
+                    array_push($c_passivesArray1, $getSurveylist['answer_id']);
+                }            
+                if($getSurveylist['answer_id'] <= 6) {
+                    array_push($detractorsArray1, $getSurveylist['answer_id']);
+                    array_push($c_detractorsArray1, $getSurveylist['answer_id']);
+                }                
+            } 
+            $comp_completedData = array_merge($c_promotersArray1, $c_passivesArray1, $c_detractorsArray1);
+            $getCompareValue = $this->getcomparesurvey($tenantId, $userId,  $this->request->getGet("tenantId"), $comparestartdate, $compareenddate , $comp_completedData);
+            $datacompare = [
+                "promoters" => $c_promotersArray1, 
+                "passives" => $c_passivesArray1, 
+                "detractors" =>  $c_detractorsArray1,
+                "getsurveyresponse" => $getCompareValue['getsurveyresponse'],
+                "totalresponse" => $getCompareValue['totalresponse'],
+                "getfullResponse" => $getCompareValue['getfullResponse'],
+                "revenueData" => $getCompareValue['revenueData']               
+            ];
         }
+        
         $model = new AnswercreateModel();
         if(is_array($daterange)){
             $model->where("CAST(created_at AS DATE) BETWEEN '$daterange[0]' AND '$daterange[1]'");
         }
         $getSurveyData = $model->whereIn('user_id', $userId)->findall();  
-        $detractorsArray1  = array();
-        $passivesArray1   = array();
-        $promotersArray1  = array();
+
         foreach($getSurveyData as $key => $getSurveylist) {
             if($getSurveylist['answer_id'] > 8) {
                 array_push($promotersArray1, $getSurveylist['answer_id']);
@@ -64,12 +109,12 @@ class AdminController extends BaseController
             }            
             if($getSurveylist['answer_id'] <= 6) {
                 array_push($detractorsArray1, $getSurveylist['answer_id']);
-            }
-            
-        } 
+            }            
+        }
+        $getresponseData = array(); 
         if($tenantId == 1){
             $model = new CreatecontactsModel();  
-            $getresponseData = $model->whereIn('user_id', $userId)->findall();   
+            $getresponseData = $model->whereIn('user_id', $userId)->findall();  
         } else {
             $model = new TenantModel();
             $tenant = $model->where('tenant_id', $tenantId)->first();
@@ -85,6 +130,15 @@ class AdminController extends BaseController
             }
             $db->close();    
         }
+        $responseOverall = array();
+        foreach($getresponseData as $key => $overalldata){
+            $split_email = explode(",", $overalldata['email_list']);
+            foreach($split_email as $splitEmail){
+                array_push($responseOverall,$splitEmail);
+            }
+        }
+
+        $responseOverall = array_unique($responseOverall);
         $promoters = $promotersArray1;
         $passives = $passivesArray1;
         $detractors = $detractorsArray1;
@@ -117,9 +171,11 @@ class AdminController extends BaseController
             $getsurveylist = $gettotal['getsurveylist'];
         }
 
-        $totalresponse = (is_array($getcontactdata)) ? count($getcontactdata):'';
+        $totalresponse = (is_array($responseOverall)) ? count($responseOverall):'';
         $getsurveyresponse = (is_array($getsurveylist)) ? count($getsurveylist):'';
         $getfullResponse = array_count_values($completedData);
+        $revenueData = count($completedData);
+        $datacompare["totalresponse"] = $totalresponse;
         $data = [
             "promoters" => $promoters, 
             "passives" => $passives, 
@@ -127,11 +183,54 @@ class AdminController extends BaseController
             "getsurveyresponse" => $getsurveyresponse,
             "totalresponse" => $totalresponse,
             "getfullResponse" => $getfullResponse,
+            "revenueData" => $revenueData,
             "getTenantdata" => $getTenantdata,
             "selectTenant" => $selectTenant,
+            "selectfilter" => $selectfilter,
             "selectRange" => $selectRange
         ];
-        return view("admin/dashboard", ["getdashData" => $data]);
+        return view("admin/dashboard", ["getdashData" => $data, "getDatacomp" => $datacompare]);
+    }
+    public function getcomparesurvey($tenantId, $userId, $getTenantId, $comp_start, $comp_end, $completedData){
+        $returnDate = $comp_start."_".$comp_end;
+        if($tenantId == 1){
+            if($getTenantId == '1' || $getTenantId == '' ) {
+                $model = new ExternalcontactsModel();  
+                if($comp_start != '' && $comp_end != ''){
+                    $model->where("CAST(created_at AS DATE) BETWEEN '$comp_start' AND '$comp_end'");
+                }
+                $getcontactdata = $model->whereIn('created_by', $userId)->findall();   
+                $model = new SurveyResponseModel();  
+                if($comp_start != '' && $comp_end != ''){
+                    $model->where("CAST(created_at AS DATE) BETWEEN '$comp_start' AND '$comp_end'");
+                }
+                $getsurveylist = $model->whereIn('user_id', $userId)->findall(); 
+            } else {
+                $model = new TenantModel();
+                $tenant = $model->where('tenant_id', $getTenantId)->first();
+                $gettotal = $this->getTotalResponse($tenant, $userId, $returnDate);
+                $getcontactdata = $gettotal['getcontactdata'];
+                $getsurveylist = $gettotal['getsurveylist'];
+            }
+        } else {
+            $model = new TenantModel();
+            $tenant = $model->where('tenant_id', $tenantId)->first();
+            $gettotal = $this->getTotalResponse($tenant, $userId, $returnDate);
+            $getcontactdata = $gettotal['getcontactdata'];
+            $getsurveylist = $gettotal['getsurveylist'];
+        }
+
+        $totalresponse = (is_array($getcontactdata)) ? count($getcontactdata):'';
+        $getsurveyresponse = (is_array($getsurveylist)) ? count($getsurveylist):'';
+        $getfullResponse = array_count_values($completedData);
+        $revenueData = count($completedData);
+        $dataComp = [           
+            "getsurveyresponse" => $getsurveyresponse,
+            "totalresponse" => $totalresponse,
+            "getfullResponse" => $getfullResponse,
+            "revenueData" => $revenueData           
+        ];
+        return $dataComp;
     }
     public function getTotalResponse($tenant, $userId, $daterange)
     {
@@ -152,6 +251,9 @@ class AdminController extends BaseController
                 $getcontactdata = $externalcount->getResultArray();
             }
             $multiClause2 ="SELECT * FROM ".$dbname.".nps_survey_response  WHERE `nps_survey_response`.`user_id` IN ('".$userIdlist."')";
+            if(is_array($daterange)){
+                $multiClause2 .=" AND CAST(created_at AS DATE) BETWEEN '$daterange[0]' AND '$daterange[1]'";
+            }
             $externalcount = $db->query($multiClause2);
             if(count($externalcount->getResultArray()) >0) {
                 $getsurveylist = $externalcount->getResultArray();

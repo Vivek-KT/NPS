@@ -1,4 +1,4 @@
-<?= $this->extend("layouts/app") ?>
+'<?= $this->extend("layouts/app") ?>
 <?= $this->section("body") ?>
 <?php include APPPATH.'Views/layouts/sidebar.php';?>
 <?php echo script_tag('js/jquery.min.js'); ?>
@@ -21,11 +21,12 @@
             <?php } ?>
             </div>
             <div class="row mt-3">
-                <div class="col-xl-4 col-lg-4 col-md-4">
+                <div class="col-xl-6 col-lg-6 col-md-6">
                     <h1>Dashboard - Live</h1>
                 </div>
-                <div class="col-xl-4 col-lg-4 col-md-4">
-                
+                <div class="col-xl-2 col-lg-2 col-md-2">
+                <input type="checkbox" class="form-check-input" id="tocompare" name="tocompare" value="yes" <?php if($getdashData['selectfilter']== "yes") {?> checked <?php } ?>>
+                 <label class="form-check-label" for="tocompare">To Compare</label>
                 </div>
                 <div class="col-xl-4 col-lg-4 col-md-4">
                     <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
@@ -50,41 +51,11 @@
                     </div>
 
                 </div>
-                <!-- <div class="col-xl-6 col-lg-6 col-md-6">
-                    <div class="button-dashboard hide-md">
-                        <button><i class="far fa-calendar" style="color: #606162;"></i>
-                            Select Dates
-                        </button>
-                        <button><i class="fas fa-filter" style="color: #696969;"></i> Filter</button>
-                    </div>
-                    <div class="Satisfaction">
-                        <p class="response-head">CSAT Summary</p>
-                        <div class="survey">
-                            <div class="sur-con">
-                                <h2>Content</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column-left">
-                        <div class="response-2">
-                            <div class="res-con">
-                                <h2>Content</h2>
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
+                
             </div>
             <div class="row">
                 <div class="col-xl-6 col-lg-6 col-md-6">
-                    <p class="response-head-1">NPS Response</p>
-                    <!-- <div class="col-1-right">
-                        <button>progress
-                            <?php $imageProperties = ['src' => 'images/Icon.svg']; 
-                            echo img($imageProperties); ?></button>
-                    </div>
-                    <div class="res-cou-2">
-                        <h2>content</h2>
-                    </div> -->
+                    <p class="response-head-1">NPS Response</p>                   
                     <canvas id="chartId" aria-label="chart" height="350" width="580"></canvas>
                 </div>
                 <div class="col-xl-6 col-lg-6 col-md-6 mt-4">
@@ -104,6 +75,7 @@
                                     <td scope="row">
                                     <p class="">Promoters</p>
                                     </td>
+                                    
                                     <td scope="row">
                                     <p class="text-center"><?php echo count($getdashData['promoters']); ?></p>
                                     </td>
@@ -112,6 +84,7 @@
                                     <td scope="row">
                                     <p class="">Passives</p>
                                     </td>
+                                    
                                     <td scope="row">
                                     <p class="text-center"><?php echo count($getdashData['passives']); ?></p>
                                     </td>
@@ -120,6 +93,8 @@
                                     <td scope="row">
                                     <p class="">Detractors</p>
                                     </td>
+                                    
+
                                     <td scope="row">
                                     <p class="text-center"><?php echo count($getdashData['detractors']); ?></p>
                                     </td>
@@ -157,11 +132,12 @@
         var currentdate = "<?php echo $getdashData['selectRange']; ?>";
         var start =  moment().subtract(32, 'days');
         var end = moment();
+        
         if(currentdate){
             var splitdate = currentdate.split("_");
             var start =  moment(new Date(splitdate[0]));
             var end =  moment(new Date(splitdate[1]));
-        }        
+        } 
         function cb(start, end) {
             $('#reportrange span').html(start.format('DD-MMMM-YYYY') + ' - ' + end.format('DD-MMMM-YYYY'));
         }
@@ -199,7 +175,36 @@
             window.location.href =  newUrl;
         });
     });
-    
+    $("#tocompare").change(function(){
+        var status= $(this).is( ":checked" );
+        var t_id = (status) ? 'yes' : 'no';
+        var newUrl = '';
+        var currentdate = "<?php echo $getdashData['selectRange']; ?>";
+        var start =  moment().subtract(32, 'days');
+        var end = moment();        
+        if(currentdate){
+            var splitdate = currentdate.split("_");
+            var start =  moment(new Date(splitdate[0]));
+            var end =  moment(new Date(splitdate[1]));
+        }
+        var currLoc = $(location).attr('href');
+        var hashes =  window.location.href.indexOf("?");  
+        var startdate = start.format('YYYY-MM-DD');
+        var enddate = end.format('YYYY-MM-DD');
+        var daterange = startdate+"_"+enddate;  
+        if(hashes == -1) {
+            var currentUrl = window.location.href +"?filter="+t_id+"&daterange="+daterange;
+            var urls = new URL(currentUrl);
+            newUrl = urls.href;
+        } else {
+            var currentUrl = window.location.href;
+            var urls = new URL(currentUrl);
+            urls.searchParams.set("filter", t_id); // setting your param
+            urls.searchParams.set("daterange", daterange); // setting your param
+            newUrl = urls.href; 
+        }
+        window.location.href =  newUrl;
+    });
     $("#tenantchange").change(function(){
         var t_id= $(this).val();
         var newUrl = '';
@@ -280,15 +285,21 @@
           if (!wrapText) {
             ctx.fillStyle = 'black';
             ctx.font = fontSizeToUse + "px " + fontStyle;
-            ctx.fillText(txt, centerX, centerY);    
-            ctx.fillStyle = color;      
-            ctx.font = "20px " + fontStyle;  
-            ctx.fillText(txt2, centerX, centerY+45);
-            var image = new Image();
-            if(state == "increase"){
-                image.src = 'images/growth.png';
+            ctx.fillText(txt, centerX, centerY); 
+            if(state == "high"){
+                ctx.fillStyle = "#FF6384";
             } else {
+                ctx.fillStyle = "#00FF80";
+            }      
+            ctx.font = "20px " + fontStyle;  
+           ctx.fillText(txt2, centerX, centerY+45);
+            var image = new Image();
+            if(state == "high"){
+                image.src = 'images/growth.png';
+            } else if(state == "low"){
                 image.src = 'images/down.png';
+            } else {
+                image.src = '';
             }
             image.onload = () => {
             ctx.drawImage(image, centerX+20, centerY+20)
@@ -348,22 +359,57 @@
         ctx.restore();
         }
       }
-    });
+    }); 
+    var flag_compare  = "<?php echo isset($_GET["filter"]) ? $_GET['filter'] : ""; ?>"; 
         var promotor  = "<?php echo count($getdashData['promoters']); ?>";
         var passives  = "<?php echo count($getdashData['passives']); ?>";
         var detractors  = "<?php echo count($getdashData['detractors']); ?>";
         var getsurveyresponse  = "<?php echo $getdashData['getsurveyresponse']; ?>";
         var totalresponse  = "<?php echo $getdashData['totalresponse']; ?>";
-        // second text value
+        // second text value for NPS Score
         var totalNPS = parseInt(promotor) + parseInt(passives)  + parseInt(detractors);
-        var totalDet =  Math.round((detractors/totalNPS) * 100) + "%";
-        var totalRR = parseInt(totalresponse) + parseInt(getsurveyresponse);
-        var totalrespreturn=  Math.round((getsurveyresponse/totalRR) * 100) + "%";
+        var totalDet =  Math.round((detractors/totalNPS) * 100);
+        // Response Rate Chart details
+        var Npsresponse = (totalresponse > 0) ? Math.round((getsurveyresponse/totalresponse) * 100 ): Math.round((getsurveyresponse) * 100);
 
-        // 9/10
-        var responserate = (totalresponse > 0) ? Math.round((getsurveyresponse/totalresponse) * 100) + "%" : Math.round((totalNPS/3) * 100) + "%";
-        var Npsresponse = (totalresponse > 0) ? Math.round((getsurveyresponse/totalresponse) * 100 ) + "%": Math.round((getsurveyresponse) * 100) + "%";
-        console.log(totalrespreturn);
+        var ratestatus, responsestatus = 0;
+        var revenuestatus,RRestatus = '';
+        var compare_ratio, totalrespreturn = '';
+        if(flag_compare == 'yes'){
+            // Revenue difference for 2 date option - Compare to option validation
+            var c_promotor  = "<?php echo (isset($getDatacomp['promoters']) ?count($getDatacomp['promoters']): 0); ?>";
+            var c_passives  = "<?php echo (isset($getDatacomp['passives']) ?count($getDatacomp['passives']): 0); ?>";
+            var c_detractors  = "<?php echo (isset($getDatacomp['detractors']) ?count($getDatacomp['detractors']): 0); ?>";
+            var c_getsurveyresponse  = "<?php echo (isset($getDatacomp['getsurveyresponse']) ?$getDatacomp['getsurveyresponse']: "");  ?>";
+            var c_totalresponse  = "<?php echo (isset($getDatacomp['totalresponse']) ?$getDatacomp['totalresponse']: "");  ?>";
+            var c_totalNPS = parseInt(c_promotor) + parseInt(c_passives)  + parseInt(c_detractors);
+
+            var c_totalDet =  Math.round((c_detractors/c_totalNPS) * 100);
+            totalNPS = (totalNPS >0) ? totalNPS : 0;
+            if(totalNPS > c_totalNPS){
+                ratestatus = parseInt(totalNPS)- parseInt(c_totalNPS);
+                revenuestatus = 'high';
+            }else {
+                ratestatus = parseInt(c_totalNPS)- parseInt(totalNPS);
+                revenuestatus = 'low';
+            }
+            compare_ratio = Math.round((ratestatus/totalNPS) * 100);
+            // Response Rate Data difference for 2 date option - Compare to option validation
+            if(getsurveyresponse > c_getsurveyresponse){
+                responsestatus = parseInt(getsurveyresponse)- parseInt(c_getsurveyresponse);
+                RRestatus = 'high';
+            }else {
+                responsestatus = parseInt(c_getsurveyresponse)- parseInt(getsurveyresponse);
+                RRestatus = 'low';
+            }
+            totalrespreturn = Math.round((responsestatus/getsurveyresponse) * 100);
+
+        }else {
+            compare_ratio = 0;
+            revenuestatus= '';
+            totalrespreturn= 0;
+            RRestatus= '';
+        }     
         // NPS Score
         var ctx = $("#chart-line");
         var myLineChart = new Chart(ctx, {
@@ -382,9 +428,9 @@
                 },
                 elements: {
                     center: {
-                        text: totalDet,
-                        text2: totalDet,
-                        state: 'increase',
+                        text:  Number.isNaN(totalDet) ? "0%" : totalDet+ "%",
+                        text2: Number.isNaN(compare_ratio) ? "0%" : compare_ratio+ "%",
+                        state: revenuestatus,
                         color: '#00FF80', // Default is #000000
                         fontStyle: 'Arial', // Default is Arial
                         sidePadding: 20, // Default is 20 (as a percentage)
@@ -412,8 +458,9 @@
                 },
                 elements: {
                     center: {
-                        text: Npsresponse,
-                        text2: totalrespreturn,
+                        text: Number.isNaN(Npsresponse) ? "0%" : Npsresponse+ "%",
+                        text2: Number.isNaN(totalrespreturn) ? "0%" : totalrespreturn + "%",
+                        state: RRestatus,
                         color: '#FF6384', // Default is #000000
                         fontStyle: 'Arial', // Default is Arial
                         sidePadding: 20, // Default is 20 (as a percentage)
@@ -424,31 +471,76 @@
             }
         });
     });
+    var flag_compare  = "<?php echo isset($_GET["filter"]) ? $_GET['filter'] : ""; ?>"; 
     var linelabel = ['1','2','3','4','5','6','7','8','9','10'];
-    var barchartData = ["<?php echo (isset($getdashData['getfullResponse'][1]) ? $getdashData['getfullResponse'][1] : ''); ?>",
-        "<?php echo (isset($getdashData['getfullResponse'][2]) ? $getdashData['getfullResponse'][2] : ''); ?>",
-        "<?php echo (isset($getdashData['getfullResponse'][3]) ? $getdashData['getfullResponse'][3] : ''); ?>",
-        "<?php echo (isset($getdashData['getfullResponse'][4]) ? $getdashData['getfullResponse'][4] : ''); ?>",
-        "<?php echo (isset($getdashData['getfullResponse'][5]) ? $getdashData['getfullResponse'][5] : ''); ?>",
-        "<?php echo (isset($getdashData['getfullResponse'][6]) ? $getdashData['getfullResponse'][6] : ''); ?>",
-        "<?php echo (isset($getdashData['getfullResponse'][7]) ? $getdashData['getfullResponse'][7] : ''); ?>",
-        "<?php echo (isset($getdashData['getfullResponse'][8]) ? $getdashData['getfullResponse'][8] : ''); ?>",
-        "<?php echo (isset($getdashData['getfullResponse'][9]) ? $getdashData['getfullResponse'][9] : ''); ?>",
-        "<?php echo (isset($getdashData['getfullResponse'][10]) ? $getdashData['getfullResponse'][10] : ''); ?>",];
+    if(flag_compare =='yes'){
+        var barchartData = ["<?php echo (isset($getdashData['getfullResponse'][1]) ? $getdashData['getfullResponse'][1] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][2]) ? $getdashData['getfullResponse'][2] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][3]) ? $getdashData['getfullResponse'][3] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][4]) ? $getdashData['getfullResponse'][4] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][5]) ? $getdashData['getfullResponse'][5] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][6]) ? $getdashData['getfullResponse'][6] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][7]) ? $getdashData['getfullResponse'][7] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][8]) ? $getdashData['getfullResponse'][8] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][9]) ? $getdashData['getfullResponse'][9] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][10]) ? $getdashData['getfullResponse'][10] : ''); ?>",];
+
+        var barDataPrevious = ["<?php echo (isset($getDatacomp['getfullResponse'][1]) ? $getDatacomp['getfullResponse'][1] : ''); ?>",
+            "<?php echo (isset($getDatacomp['getfullResponse'][2]) ? $getDatacomp['getfullResponse'][2] : ''); ?>",
+            "<?php echo (isset($getDatacomp['getfullResponse'][3]) ? $getDatacomp['getfullResponse'][3] : ''); ?>",
+            "<?php echo (isset($getDatacomp['getfullResponse'][4]) ? $getDatacomp['getfullResponse'][4] : ''); ?>",
+            "<?php echo (isset($getDatacomp['getfullResponse'][5]) ? $getDatacomp['getfullResponse'][5] : ''); ?>",
+            "<?php echo (isset($getDatacomp['getfullResponse'][6]) ? $getDatacomp['getfullResponse'][6] : ''); ?>",
+            "<?php echo (isset($getDatacomp['getfullResponse'][7]) ? $getDatacomp['getfullResponse'][7] : ''); ?>",
+            "<?php echo (isset($getDatacomp['getfullResponse'][8]) ? $getDatacomp['getfullResponse'][8] : ''); ?>",
+            "<?php echo (isset($getDatacomp['getfullResponse'][9]) ? $getDatacomp['getfullResponse'][9] : ''); ?>",
+            "<?php echo (isset($getDatacomp['getfullResponse'][10]) ? $getDatacomp['getfullResponse'][10] : ''); ?>",];
+        var barData = {
+            labels: linelabel,
+            datasets: [{
+                label: "NPS Customer Response",
+                data: barchartData,
+                backgroundColor: 'red'
+            },
+            {
+                label: "NPS- Compare response",
+                data: barDataPrevious,
+                backgroundColor: 'yellow'
+
+            }
+        ],
+        }
+    }else {
+        var barchartData = ["<?php echo (isset($getdashData['getfullResponse'][1]) ? $getdashData['getfullResponse'][1] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][2]) ? $getdashData['getfullResponse'][2] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][3]) ? $getdashData['getfullResponse'][3] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][4]) ? $getdashData['getfullResponse'][4] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][5]) ? $getdashData['getfullResponse'][5] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][6]) ? $getdashData['getfullResponse'][6] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][7]) ? $getdashData['getfullResponse'][7] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][8]) ? $getdashData['getfullResponse'][8] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][9]) ? $getdashData['getfullResponse'][9] : ''); ?>",
+            "<?php echo (isset($getdashData['getfullResponse'][10]) ? $getdashData['getfullResponse'][10] : ''); ?>",];
+        var barData = {
+            labels: linelabel,
+            datasets: [{
+                label: "NPS Customer Response",
+                data: barchartData,
+                backgroundColor: ['red', 'pink', 'brown', 'darkblue', 'lightgreen', 'darkred', 'gold', 'lightblue', 'violet', 'yellow']
+            }],
+        }
+    }
+    var chartOptions = {
+        responsive: true,  
+        legend: {position: "top" },  
+        title: { display: true, text: "Chart.js Bar Chart" },  
+        scales: {yAxes: [{ ticks: { beginAtZero: true}}] }
+    }
     var chrt = document.getElementById("chartId").getContext("2d");
       var chartId = new Chart(chrt, {
          type: 'bar',
-         data: {
-            labels: linelabel,
-            datasets: [{
-               label: "NPS Customer Response",
-               data: barchartData,
-               backgroundColor: ['red', 'pink', 'brown', 'darkblue', 'lightgreen', 'darkred', 'gold', 'lightblue', 'violet', 'yellow']
-            }],
-         },
-         options: {
-            responsive: true,
-         },
+         data: barData,
+         options: chartOptions,
       });
 </script>
     <?= $this->endSection() ?>

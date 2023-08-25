@@ -25,7 +25,7 @@
             <div class="form-label-group">
             <label for="tenantname">Enter your Tenant Name</label>
 
-              <input type="text" class="form-control" name="tenantname" id="tenantname" value="<?php echo set_value('tenantname'); ?>">
+              <input type="text" class="form-control" name="tenantname" id="tenantname" value="<?php echo set_value('tenantname'); ?>" onChange="this.value=this.value.toLowerCase();">
               <?php if (isset($validation)) : ?> <div style="color:red"><?= $validation->showError('tenantname') ?></div><?php endif; ?>
             </div>
           </div>

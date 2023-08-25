@@ -116,7 +116,7 @@
       border-bottom: 10px solid #3869D4;
       border-left: 18px solid #3869D4;
       display: inline-block;
-      color: #FFF  !important;
+      color: #FFF;
       text-decoration: none;
       border-radius: 3px;
       box-shadow: 0 2px 3px rgba(0, 0, 0, 0.16);
@@ -438,10 +438,8 @@
   </head>
   <body>
     <?php 
-        $reset = base_url()."getSurveyAnwser/".$contactdata["email_id"]."/".$postdata['survey']."/".$userId."/".$tenantdata['tenant_id']."/".$surveyrandom;
-        $name = $contactdata["firstname"]." ".$contactdata["lastname"];
-
-        $data = $postdata['editor'];
+        $reset = base_url()."login/";
+        $name = $postdata["firstname"]." ".$postdata["lastname"];
 
     ?>
     <span class="preheader" align="center">Get started</span>
@@ -457,23 +455,21 @@
                   <tr>
                     <td class="content-cell">
                       <div class="f-fallback">
-                      <h1>Hi <?php echo $name; ?>,</h1>
-                        <div>WE NEED YOUR FEEDBACK </div>
-                        <div>help us to serve you better</div>
-                        <?php echo $data; ?>
-                        <!-- <img src="cid:surveyimg" class="rounded-3" style="width: 450px;"> -->
-
-                        <!-- <a href="<?php echo $reset; ?>"  target="_blank">
-                            <img src="<?php echo $path = base_url();  ?>images/surveyimg.png" class="rounded-3" style="width: 450px;">
-                        </a>  -->
+                        <h1>Hi <?php echo $name; ?>,</h1>
+                        <p>Your account has been created on the NPS.</p>
+                        <p><b>Please login and reset your account using the below link.</b></p>
                         <!-- Action -->
+                        <p><b>Tenant Details: <?php echo $postdata["tenantname"];  ?></b></p>
+                        <p><b>Login Details: <?php echo $postdata["email"];  ?></b></p>
+                        <p><b>Password: <?php echo $postdata["password"];  ?></b></p>
+
                         <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                           <tr>
                             <td align="center">
                               <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
                                 <tr>
                                   <td align="center">
-                                    <a href="<?php echo $reset; ?>" class="f-fallback button button--green" target="_blank">Take the Survey</a>
+                                    <a href="<?php echo $reset; ?>" class="f-fallback button button--green" target="_blank">Click here to login</a>
                                   </td>
                                 </tr>
                               </table>

@@ -41,7 +41,7 @@
       <div class="col-xl-6 col-lg-6 col-md-6">
   <div class="form-group">
     <div class="input-group">         
-        <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="amswer" id="answer_data" >
+        <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="answer" id="answer_data" >
             <option value="">-select-</option>
             <option value="nps">NPS Answer Type</option>
             <option value="other">Other</option>
@@ -58,7 +58,7 @@
       <div class="col-xl-6 col-lg-6 col-md-6">
   <div class="form-group">
     <div class="input-group">         
-        <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="amswerdata[]" id="answerother" multiple>
+        <select class="custom-select form-select custom-select-sm" class="custom-select custom-select-sm" aria-label="Default select example" name="answerdata[]" id="answerother" multiple>
         <?php foreach($answercollection as $key => $answerlist) { ?> 
             <option value="<?php echo $answerlist; ?>"><?php echo $answerlist; ?></option>
           <?php  } ?>
