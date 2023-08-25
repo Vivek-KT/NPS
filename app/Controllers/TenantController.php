@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\UserModel;
 use App\Models\TenantModel;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 
 class TenantController extends BaseController
@@ -26,7 +28,7 @@ class TenantController extends BaseController
                 'lastname' => 'required|alpha',
                 'username' => 'required|min_length[6]|max_length[50]',
                 'tenantname' => 'required|min_length[2]|max_length[50]',
-                'email' => 'required|min_length[6]|max_length[50]|valid_email',
+                'email' => 'required|min_length[6]|max_length[50]|valid_email|validateEmail[email]',
                 'phone_no' => 'required|numeric|exact_length[10]',
                 'password' => 'required|min_length[4]|max_length[255]',
                 'confirmpassword' => 'required|min_length[4]|max_length[255]|matches[password]'
@@ -37,6 +39,7 @@ class TenantController extends BaseController
                 ],
                 'email' => [
                     'valid_email' => 'Please check the Email field. It does not appear to be valid.',
+                    'validateEmail' => 'A Email Address is already available',
                 ],               
                 'tenantname' => [
                     'validateTenant' => "Tenant name is already exist",
@@ -57,11 +60,56 @@ class TenantController extends BaseController
                     $userId = $this->CreateUser($data,$tenantId);
                     $this->createUserByTenant($tenantId, $userId, $data);
                 }
-                session()->setFlashdata('response',"Tenant Inserted Successfully");
+                $emailstatus = $this->sendmailforReg($this->request->getPost());
+
+                session()->setFlashdata('response',$emailstatus);
                 return redirect()->to(base_url('createtenant'));
             }
         }
         return view('createTenant');
+    }
+
+    public function sendmailforReg($postData){
+        $whitelist = array( '127.0.0.1','::1');
+        $mail = new PHPMailer(true); 
+        $template = view("template/email-template-register", [ "postdata" => $postData]); 
+        $subject = "NPS Customer Registration || New Account Creation";
+        try {
+            if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+
+                $mail->isSMTP();  
+                $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
+                $mail->SMTPAuth     = true;     
+                $mail->Username     = 'hctoolssmtp@gmail.com';  
+                $mail->Password     = 'iyelinyqlqdsmhro';
+                $mail->SMTPSecure   = 'tls';  
+                $mail->Port         = 587;  
+                $mail->Subject      = $subject;
+                $mail->Body         = $template;
+                
+                $mail->setFrom('hctoolssmtp@gmail.com', 'CI-NPS');
+                
+                $mail->addAddress($postData["email"]);  
+                $mail->isHTML(true);
+                $response = $mail->send();  
+            } else {
+               // Always set content-type when sending HTML email
+               $headers = "MIME-Version: 1.0" . "\r\n";
+               $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+               // More headers
+               $headers .= 'From: <jeyprabu@hctools.in>' . "\r\n";
+               $response = mail($postdata["email"],$subject,$template, $headers);
+            }    
+			if(!$response) {
+			    return "Something went wrong. Please try again.". $mail->ErrorInfo;
+			}
+		    else {
+			    return "Your Account has been created";
+		    }
+		    
+		} catch (Exception $e) {
+		    return "Something went wrong. Please try again.". $mail->ErrorInfo;
+		}
     }
     public function insertTenant($postdata) 
     {
@@ -84,7 +132,7 @@ class TenantController extends BaseController
             "password" => password_hash($postdata['password'], PASSWORD_DEFAULT),
             "status" => "1"
         ];
-
+                                                                                                                                                                                                            
         $userId = $this->CreateUser($data,$tenantId);
         $this->createUserByTenant($tenantId, $userId, $data);
     }
@@ -215,6 +263,7 @@ class TenantController extends BaseController
             `answer_id` varchar(55) NOT NULL,
             `question_id2` int(11) NOT NULL,
             `answer_id2` varchar(55) NOT NULL,
+            `mail_status` varchar(120) NOT NULL,
             `ip_details` varchar(120) NOT NULL,
             `created_at` timestamp NOT NULL DEFAULT current_timestamp()
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;";

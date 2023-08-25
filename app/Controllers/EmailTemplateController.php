@@ -169,31 +169,42 @@ class EmailTemplateController extends BaseController
     }
 
     public function createTemplateForSurvey($postdata, $userId, $email, $tenant){
-
+        $whitelist = array( '127.0.0.1','::1');
         $model = new ExternalcontactsModel();
         $multiClause = array('email_id' => $email);
         $contactlist = $model->where($multiClause)->first();
-        $template = view("template/email-template-survey", [ "userId" => $userId, "postdata" => $postdata,"contactdata" => $contactlist, "tenantdata" => $tenant]); 
-        $mail = new PHPMailer(true);          
+        $surveyrandom = $this->randomSurvey();
+        $template = view("template/email-template-survey", [ "userId" => $userId, "postdata" => $postdata,"contactdata" => $contactlist, "tenantdata" => $tenant, "surveyrandom" => $surveyrandom]); 
+        $mail = new PHPMailer(true);      
+        $subject =  $postdata['subject'] ? $postdata['subject']  :"What did you think about NPS";    
         try {
-            
-            $mail->isSMTP();  
-            $mail->addCustomHeader('MIME-Version: 1.0');
-            $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
-            $mail->SMTPDebug    = 1;
-            $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
-            $mail->SMTPAuth     = true;     
-            $mail->Username     = 'hctoolssmtp@gmail.com';  
-            $mail->Password     = '*******';
-            $mail->SMTPSecure   = 'tls';  
-            $mail->Port         = 587;  
-            $mail->Subject      = $postdata['subject'] ? $postdata['subject']  :"What did you think about NPS";
-            $mail->Body         = $template;
-            $mail->setFrom('hctoolssmtp@gmail.com', 'CI-NPS');
-            $mail->addAddress($email);  
-            $mail->isHTML(true);      
-            
-            if(!$mail->send()) {
+            if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+
+                $mail->isSMTP();  
+                $mail->addCustomHeader('MIME-Version: 1.0');
+                $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
+                $mail->SMTPDebug    = 1;
+                $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
+                $mail->SMTPAuth     = true;     
+                $mail->Username     = 'hctoolssmtp@gmail.com';  
+                $mail->Password     = 'iyelinyqlqdsmhro';
+                $mail->SMTPSecure   = 'tls';  
+                $mail->Port         = 587;  
+                $mail->Subject      = $subject;
+                $mail->Body         = $template;
+                $mail->setFrom('hctoolssmtp@gmail.com', 'CI-NPS');
+                $mail->addAddress($email);  
+                $mail->isHTML(true);      
+                $response = $mail->send();
+            } else {
+                // Always set content-type when sending HTML email
+                $headers = "MIME-Version: 1.0" . "\r\n";
+                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                // More headers
+                $headers .= 'From: <jeyprabu@hctools.in>' . "\r\n";
+                $response = mail($email,$subject,$template, $headers);
+             }    
+            if(!$response) {
                 return "Something went wrong. Please try again.". $mail->ErrorInfo;
             }
             else {
@@ -211,12 +222,12 @@ class EmailTemplateController extends BaseController
         $List = implode(', ', $postData["checkoutemail"]);
         $model = new CreatecontactsModel();  
         $data = [
-            "subject" => $postData["subject"],
+            "subject" =>  $postData['subject'] ? $postData['subject']  :"What did you think about NPS",
             "survey_id" => $postData["survey"],
             "email_list" => $List,
             "message" => $postData["editor"],
             "user_id" => $userId
-        ];
+        ]; echo "<pre>";
         $result = $model->insertBatch([$data]);
     }
     public function createMailTemplatesubTenant($postData, $userId, $tenant) {
@@ -226,7 +237,7 @@ class EmailTemplateController extends BaseController
         $db->query('USE '.$dbname);
         $List = implode(', ', $postData["checkoutemail"]);
         $data = [
-            "subject" => $postData["subject"],
+            "subject" =>   $postData['subject'] ? $postData['subject']  :"What did you think about NPS",
             "survey_id" => $postData["survey"],
             "email_list" => $List,
             "message" => $postData["editor"],
@@ -238,14 +249,20 @@ class EmailTemplateController extends BaseController
         $db->query($new_db_insert_user);
 
     }
-    public function getSurveyAnwser($email, $survey_id, $userid, $tenantid)
+    public function getSurveyAnwser($email, $survey_id, $userid, $tenantid, $randomKey)
     {
-        if($tenantid > 1) {
-            $getSurveyData = $this->getcollectionsubtenant($email, $survey_id, $userid, $tenantid);
+        $model = new AnswercreateModel();
+        $returnkey = $model->where('mail_status', $randomKey)->first();
+        if($returnkey ==''){
+            if($tenantid > 1) {
+                $getSurveyData = $this->getcollectionsubtenant($email, $survey_id, $userid, $tenantid, $randomKey);
+            } else {
+                $getSurveyData = $this->getcollection($email, $survey_id, $userid, $tenantid, $randomKey);
+            }
+            return view('validateanswer',["getSurveyData" => $getSurveyData, "","randomKey" => $randomKey]);
         } else {
-            $getSurveyData = $this->getcollection($email, $survey_id, $userid, $tenantid);
+            return view('thankyou');
         }
-        return view('validateanswer',["getSurveyData" => $getSurveyData]);
     }
     public function getcollectionsubtenant($email, $survey_id, $userid, $tenantid) {
         $model = new TenantModel();
@@ -321,6 +338,16 @@ class EmailTemplateController extends BaseController
         ];
         return $getSurveyData;
     }
+    public function randomSurvey() {
+        $alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ0123456789!@#$%&*";
+        $pass = array(); //remember to declare $pass as an array
+        $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
+        for ($i = 0; $i < 8; $i++) {
+            $n = rand(0, $alphaLength);
+            $pass[] = $alphabet[$n];
+        }
+        return implode($pass); //turn the array into a string
+    }
     public function createsurveyanswer(){
   
         if ($this->request->getMethod() == 'post') {
@@ -354,6 +381,7 @@ class EmailTemplateController extends BaseController
                         "question_id" => $this->request->getPost("question")[0],
                         "answer_id" => $answer[0],
                         "question_id2" => $this->request->getPost("question")[1],
+                        "mail_status" => $this->request->getPost("randomkey"),
                         "answer_id2" => $answer[1],
                         "ip_details" => getHostByName(getHostName())
                     ];
@@ -366,7 +394,7 @@ class EmailTemplateController extends BaseController
                         $this->AnswerReponseforSubTenant($this->request->getPost(),$data);
                     }
                 session()->setFlashdata('response',"Your survey feedback has beed recorded.");
-                return view('validateanswer', ["getSurveyData" => $getSurveyData]);
+                return view('thankyou', ["getSurveyData" => $getSurveyData]);
             }
 
         }

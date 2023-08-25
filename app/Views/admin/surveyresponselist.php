@@ -56,7 +56,7 @@
         <div class="d-flex flex-column"> <div class="p-2 bd-highlight container"><div class="row">
             <div class="col-xl-2 col-lg-2 col-md-2"> <i class="bi bi-clock"></i><?php echo date("h:m:s",$timestamp); ?></div>
             <div class="col-xl-4 col-lg-4 col-md-4"> <i class="bi bi-calendar"></i><?php echo date("l,m d,Y",$timestamp); ?></div>
-            <div class="col-xl-4 col-lg-4 col-md-4"> <i class="bi bi-telephone"></i><?php echo $getSurveylist['userdata']['contact_details']; ?></div>
+            <div class="col-xl-4 col-lg-4 col-md-4"> <i class="bi bi-telephone"></i><?php echo isset($getSurveylist['userdata']) ? $getSurveylist['userdata']['contact_details'] : ""; ?></div>
         </div></div>
         <div class="p-2 bd-highlight"> <span ><?php echo $getSurveylist["questiondata"][0]['question_name']; ?></span></div>
         <div class="p-2 bd-highlight"> <span ><?php echo $getSurveylist["questiondata"][1]['question_name']; ?></span></div>
@@ -64,7 +64,7 @@
         </td>
         <td scope="row">
         <div class="d-flex flex-column"> <div class="p-2 bd-highlight container"><div class="row">
-            <div class="col-xl-12 col-lg-12 col-md-12"> <i class="bi bi-envelope"></i><?php echo $getSurveylist['userdata']['email_id']; ?></div>
+            <div class="col-xl-12 col-lg-12 col-md-12"> <i class="bi bi-envelope"></i><?php echo isset($getSurveylist['userdata']) ? $getSurveylist['userdata']['email_id'] :''; ?></div>
         </div></div>
         <div class="p-2 bd-highlight"> <span ><?php echo $getSurveylist["answer_id1"]; ?></span></div>
         <div class="p-2 bd-highlight"> <span ><?php echo $getSurveylist["answer_id2"]; ?></span></div>

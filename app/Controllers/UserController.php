@@ -99,7 +99,7 @@ class UserController extends BaseController
                 'lastname' => 'required|alpha',
                 'username' => 'required|min_length[6]|max_length[50]',
                 'tenantname' => 'required|min_length[2]|max_length[50]',
-                'email' => 'required|min_length[6]|max_length[50]|valid_email',
+                'email' => 'required|min_length[6]|max_length[50]|valid_email|validateEmail[email]',
                 'phone_no' => 'required|numeric|exact_length[10]',
                 'password' => 'required|min_length[4]|max_length[255]',
                 'confirmpassword' => 'required|min_length[4]|max_length[255]|matches[password]',
@@ -110,6 +110,7 @@ class UserController extends BaseController
                 ],
                 'email' => [
                     'valid_email' => 'Please check the Email field. It does not appear to be valid.',
+                    'validateEmail' => 'A Email Address is already available',
                 ],
                 
             ];
@@ -331,28 +332,38 @@ class UserController extends BaseController
         }
         return implode($pass); //turn the array into a string
     }
+    
     public function createTemplateForMail($postdata, $newpassword, $userData){
-
+        $whitelist = array( '127.0.0.1','::1');
         $mail = new PHPMailer(true); 
         $template = view("template/email-template", ["password" => $newpassword, "userdata" => $userData, "postData" => $postdata]); 
+        $subject = "NPS Customer || Forget Password";
 		try {
-		    
-		    $mail->isSMTP();  
-		    $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
-		    $mail->SMTPAuth     = true;     
-		    $mail->Username     = 'hctoolssmtp@gmail.com';  
-		    $mail->Password     = '*****';
-			$mail->SMTPSecure   = 'tls';  
-			$mail->Port         = 587;  
-			$mail->Subject      = "Sample Subject from CI";
-			$mail->Body         = $template;
-            
-			$mail->setFrom('hctoolssmtp@gmail.com', 'CI-NPS');
-			
-			$mail->addAddress($postdata["email"]);  
-			$mail->isHTML(true);      
-			
-			if(!$mail->send()) {
+		    if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+                $mail->isSMTP();  
+                $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
+                $mail->SMTPAuth     = true;     
+                $mail->Username     = 'hctoolssmtp@gmail.com';  
+                $mail->Password     = 'iyelinyqlqdsmhro';
+                $mail->SMTPSecure   = 'tls';  
+                $mail->Port         = 587;  
+                $mail->Subject      = $subject;
+                $mail->Body         = $template;
+                
+                $mail->setFrom('hctoolssmtp@gmail.com', 'CI-NPS');
+                
+                $mail->addAddress($postdata["email"]);  
+                $mail->isHTML(true);      
+                $response = $mail->send();
+            }else {
+                // Always set content-type when sending HTML email
+                $headers = "MIME-Version: 1.0" . "\r\n";
+                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                // More headers
+                $headers .= 'From: <jeyprabu@hctools.in>' . "\r\n";
+                $response = mail($postdata["email"],$subject,$template, $headers);
+            }
+			if(!$response) {
 			    return "Something went wrong. Please try again.". $mail->ErrorInfo;
 			}
 		    else {
@@ -364,26 +375,38 @@ class UserController extends BaseController
 		}
     }
     public function createTemplateForMailReg($postdata, $userId){
+        $whitelist = array( '127.0.0.1','::1');
         $mail = new PHPMailer(true); 
         $template = view("template/email-template-reg", ["postdata" => $postdata, "userId" => $userId]); 
+        $subject = "NPS Customer || Create Account";
+
 		try {
-		    
-		    $mail->isSMTP();  
-		    $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
-		    $mail->SMTPAuth     = true;     
-		    $mail->Username     = 'hctoolssmtp@gmail.com';  
-		    $mail->Password     = '*****';
-			$mail->SMTPSecure   = 'tls';  
-			$mail->Port         = 587;  
-			$mail->Subject      = "Sample Subject from CI";
-			$mail->Body         = $template;
-            
-			$mail->setFrom('hctoolssmtp@gmail.com', 'CI-NPS');
-			
-			$mail->addAddress($postdata["email"]);  
-			$mail->isHTML(true);      
-			
-			if(!$mail->send()) {
+            if(in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+
+                $mail->isSMTP();  
+                $mail->Host         = 'smtp.gmail.com'; //smtp.google.com
+                $mail->SMTPAuth     = true;     
+                $mail->Username     = 'hctoolssmtp@gmail.com';  
+                $mail->Password     = 'iyelinyqlqdsmhro';
+                $mail->SMTPSecure   = 'tls';  
+                $mail->Port         = 587;  
+                $mail->Subject      = $subject;
+                $mail->Body         = $template;
+                
+                $mail->setFrom('hctoolssmtp@gmail.com', 'CI-NPS');
+                
+                $mail->addAddress($postdata["email"]);  
+                $mail->isHTML(true);   
+                $response = $mail->send();  
+            } else {
+                // Always set content-type when sending HTML email
+                $headers = "MIME-Version: 1.0" . "\r\n";
+                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                // More headers
+                $headers .= 'From: <jeyprabu@hctools.in>' . "\r\n";
+                $response = mail($postdata["email"],$subject,$template, $headers);
+            }
+			if(!$response) {
 			    return "Something went wrong. Please try again.". $mail->ErrorInfo;
 			}
 		    else {

@@ -13,7 +13,7 @@ class AnswercreateModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ["email","campign_id","user_id", "question_id", "answer_id","question_id2","answer_id2", "ip_details"];
+    protected $allowedFields    = ["email","campign_id","user_id", "question_id", "answer_id","question_id2","answer_id2","mail_status", "ip_details"];
 
     // Dates
     protected $useTimestamps = false;

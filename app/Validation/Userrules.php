@@ -9,12 +9,15 @@ class Userrules
     {
         $model = new TenantModel();
         $tenant = $model->where('tenant_name', $data['tenantname'])->first();
-
-        $model = new UserModel();
-        $multiClause = array('email' => $data['email'],'tenant_id' => $tenant['tenant_id']);
-        $user = $model->where($multiClause)->first();
-        
-        if (!$user) {
+        if($tenant){
+            $model = new UserModel();
+            $multiClause = array('email' => $data['email'],'tenant_id' => $tenant['tenant_id']);
+            $user = $model->where($multiClause)->first();
+            
+            if (!$user) {
+                return false;
+            }
+        } else {
             return false;
         }
 
@@ -27,6 +30,17 @@ class Userrules
         ->first();
 
         if (!$tenant) {
+            return true;
+        }
+    return false;
+    }
+    public function validateEmail(string $str, string $fields, array $data)
+    {
+        $model = new UserModel();
+        $user = $model->where('email' ,$data['email'])
+        ->first();
+
+        if (!$user) {
             return true;
         }
     return false;

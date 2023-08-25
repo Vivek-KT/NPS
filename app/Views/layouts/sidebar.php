@@ -28,7 +28,7 @@
 
                 <ul class="menu-links">
                     <li class="nav-link">
-                        <a href="<?php echo site_url('admin'); ?>">
+                        <a href="<?php echo site_url('admin'); ?>?filter=no">
                             <?php $imageProperties = ['src' => 'images/majesticons_home.svg','class' => 'img-fluid']; 
                             echo img($imageProperties); ?>
                             <span class="text nav-text">Dashboard</span>
@@ -93,7 +93,7 @@
                         <a href="<?php echo site_url('getCustomerData'); ?>">
                         <?php $imageProperties = ['src' => 'images/Search Client.png','class' => 'img-fluid']; 
                             echo img($imageProperties); ?>
-                            <span class="text nav-text">Customer Details</span>
+                            <span class="text nav-text">Contact Details</span>
                         </a>
                     </li>
 

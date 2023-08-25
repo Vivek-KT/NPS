@@ -49,14 +49,14 @@
             </div> 
           </div>
           
-          <div class="form-group mb-3">
+          <!-- <div class="form-group mb-3">
             <div class="form-row row"> 
               <label class="control-label  col-xl-5 col-lg-5 col-md-5" for="Send Email">Send Email to:</label>
                 <div class="col-xl-7 col-lg-7 col-md-7">
                 <input type="text" class="form-control" id="sendemail" placeholder="Send Email to" name="sendemail" autocomplete="off" >
                 </div>
               </div>
-            </div>
+            </div> -->
               
           <div class="form-group mb-3">
             <div class="form-row row"> 

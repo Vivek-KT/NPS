@@ -61,8 +61,8 @@ class QandAController extends BaseController
         $data = [
             "question_name" => $postData["question"],
             "description" => $postData["qinfo"],
-            "info_details" => $postData["amswer"],
-            "other_option" => $postData["amswerdata"] ? json_encode($postData["amswerdata"]): '',
+            "info_details" => $postData["answer"],
+            "other_option" => isset($postData["answerdata"]) ? json_encode($postData["answerdata"]): '',
             "user_id" => $userId
         ];
         $result = $model->insertBatch([$data]);
@@ -77,8 +77,8 @@ class QandAController extends BaseController
         $data = [
             "question_name" => $postData["question"],
             "description" => $postData["qinfo"],
-            "info_details" => $postData["amswer"],
-            "other_option" => $postData["amswerdata"] ? json_encode($postData["amswerdata"]): ''
+            "info_details" => $postData["answer"],
+            "other_option" => isset($postData["answerdata"]) ? json_encode($postData["answerdata"]): ''
         ];
         $model->update($question_id,$data);
     }
@@ -92,8 +92,8 @@ class QandAController extends BaseController
             "question_id" => $question_id,
             "question_name" => $postData["question"],
             "description" => $postData["qinfo"],
-            "info_details" => $postData["amswer"],
-            "other_option" => $postData["amswerdata"] ? json_encode($postData["amswerdata"]): '',
+            "info_details" => $postData["answer"],
+            "other_option" => isset($postData["answerdata"]) ? json_encode($postData["answerdata"]): '',
             "user_id" => $userId
         ];
         $key = array_keys($data); 
@@ -111,8 +111,8 @@ class QandAController extends BaseController
         $data = [
             "question_name" => $postData["question"],
             "description" => $postData["qinfo"],
-            "info_details" => $postData["amswer"],
-            "other_option" => $postData["amswerdata"] ? json_encode($postData["amswerdata"]): ''
+            "info_details" => $postData["answer"],
+            "other_option" => isset($postData["answerdata"]) ? json_encode($postData["answerdata"]): ''
         ];
         foreach($data as $key=>$val) {
             $cols[] = "$key = '$val'";
